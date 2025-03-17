@@ -32,7 +32,8 @@ class ChatPageState extends State<ChatPage> {
   List<ChatMessage> _messages = [];
   final ChatStorage _chatStorage = ChatStorage();
   String socketStatus = 'Socket inactive';
-  bool isVideoCallActive = false; // Controls visibility of video call UI
+  bool isVideoCallActive = false;
+  final GlobalKey<VideoCallWidgetState> _videoCallKey = GlobalKey();
 
   @override
   void initState() {
@@ -159,7 +160,7 @@ class ChatPageState extends State<ChatPage> {
           if (data['type'] == 'offer' || data['type'] == 'answer' || data['type'] == 'iceCandidate') {
             // Forward signaling data to the VideoCallWidget
             if (isVideoCallActive) {
-              _videoCallKey.currentState?._handleSignalingData(data);
+              _videoCallKey.currentState?.handleSignalingData(data);
             }
           } else {
             _handleJsonMessage(message);
@@ -332,6 +333,7 @@ class ChatPageState extends State<ChatPage> {
               bottom: 80,
               right: 10,
               child: VideoCallWidget(
+                key: _videoCallKey,
                 peerId: widget.deviceName,
                 onEndCall: _endVideoCall,
               ),
