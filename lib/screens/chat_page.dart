@@ -168,8 +168,15 @@ class ChatPageState extends State<ChatPage> {
         } catch (e) {
           debugPrint("Error decoding JSON message: $e");
         }
-      } else {
-        _handleTextMessage(message);
+      }
+      else {
+        if(message == "Socket active"){
+          setState(() {
+            socketStatus = "Socket active";
+          });
+        } else {
+          _handleTextMessage(message);
+        }
       }
     }
   }
