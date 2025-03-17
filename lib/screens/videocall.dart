@@ -1,5 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
+
+import '../services/wifi_p2p_manager.dart';
 
 class VideoCallWidget extends StatefulWidget {
   final String peerId;
@@ -93,7 +97,7 @@ class VideoCallWidgetState extends State<VideoCallWidget> {
 
   void _sendSignalingData(Map<String, dynamic> data) {
     // Send signaling data to the remote peer via your Wi-Fi P2P socket
-    // Example: WifiP2PManager.instance.sendStringToSocket(jsonEncode(data));
+    WifiP2PManager.instance.sendStringToSocket(jsonEncode(data));
   }
 
   void handleSignalingData(Map<String, dynamic> data) async {
