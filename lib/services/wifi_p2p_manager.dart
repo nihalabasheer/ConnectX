@@ -235,20 +235,13 @@ class WifiP2PManager {
               // ADD TO FUTURE DOWNLOADS
               for (String msg in event.toString().split(_groupSeparation)) {
                 String url = msg.toString().split(_fileSizeSeperation).last;
-                int size = int.tryParse(msg
-                    .toString()
-                    .replaceFirst(_fileTransferCode, "")
-                    .split(_fileSizeSeperation)
-                    .first) ??
+                int size = int.tryParse(msg.toString().replaceFirst(_fileTransferCode, "").split(_fileSizeSeperation).first) ??
                     0;
                 if (!(url.startsWith("http://$_ipAddress:$_port/"))) {
                   int id = int.tryParse(url.split("&id=").last) ??
                       Random().nextInt(10000);
                   String filename = await _setName(
-                      url
-                          .split("/")
-                          .last
-                          .replaceFirst("&id=${url.split("&id=").last}", ""),
+                      url.split("/").last.replaceFirst("&id=${url.split("&id=").last}", ""),
                       downloadPath);
                   String path = "$downloadPath$filename";
                   CancelToken token = CancelToken();
@@ -899,4 +892,18 @@ class WifiP2PManager {
   Future<bool> enableWifiServices() async => await _flutterP2pConnectionPlugin.enableWifiServices();
 
   //Future<bool> connect(String address) async => await FlutterP2pConnectionPlatform.instance.connect(address) == true;
+
+  Function(dynamic)? _messageHandler;
+
+  // Set a callback for incoming messages
+  void setMessageHandler(Function(dynamic) handler) {
+    _messageHandler = handler;
+  }
+
+  // Example of how to call the message handler when a message is received
+  void _onMessageReceived(dynamic message) {
+    if (_messageHandler != null) {
+      _messageHandler!(message);
+    }
+  }
 }
