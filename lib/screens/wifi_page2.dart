@@ -19,7 +19,7 @@ class WifiPage2 extends StatefulWidget {
 
 class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver,AutomaticKeepAliveClientMixin{
   final TextEditingController msgText = TextEditingController();
-  final DeviceStorage _deviceStorage = DeviceStorage(); // Instantiate DeviceStorage
+  final DeviceStorage _deviceStorage = DeviceStorage();
   late Future<List<Device>> savedDevices;
   //final WifiP2PManager _wifiP2PManager = WifiP2PManager();
   WifiP2PInfo? wifiP2PInfo;
@@ -529,25 +529,6 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver,Autom
                     );
                   }
                 },
-              ),
-
-              TextField(
-                controller: msgText,
-                decoration: const InputDecoration(
-                  hintText: "message",
-                ),
-              ),
-              ElevatedButton(
-                onPressed: () async {
-                  sendMessage();
-                },
-                child: const Text("Send Message"),
-              ),
-              ElevatedButton(
-                onPressed: () async {
-                  await requestManageAllFilesPermissionAndSendFile();
-                },
-                child: const Text("Send File"),
               ),
             ],
           ),
