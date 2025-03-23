@@ -15,23 +15,25 @@ class SettingsPageState extends State<SettingsPage> {
   late TextEditingController _deviceNameController;
   late SharedPreferences _prefs;
   bool _isEditingDeviceName = false;
+  late FocusNode _deviceNameFocusNode;
 
   @override
   void initState() {
     super.initState();
+    _deviceNameFocusNode = FocusNode();
     _loadSettings();
+  }
+
+  @override
+  void dispose() {
+    _deviceNameFocusNode.dispose();
+    super.dispose();
   }
 
   _loadSettings() async {
     _prefs = await SharedPreferences.getInstance();
-
-    // Fetch stored device name from SharedPreferences (set in first-time login)
     String? storedDeviceName = _prefs.getString('userName');
-
-    // Get the system default device name if nothing was stored
     String systemDeviceName = Platform.localHostname;
-
-    // Use stored name if available, otherwise use the default system name
     _deviceNameController = TextEditingController(
       text: storedDeviceName ?? systemDeviceName,
     );
@@ -40,7 +42,7 @@ class SettingsPageState extends State<SettingsPage> {
   }
 
   _saveDeviceName() async {
-    await _prefs.setString('userName', _deviceNameController.text); // Use 'userName' key
+    await _prefs.setString('userName', _deviceNameController.text);
     setState(() {
       _isEditingDeviceName = false;
     });
@@ -56,6 +58,7 @@ class SettingsPageState extends State<SettingsPage> {
         _saveDeviceName();
       } else {
         _isEditingDeviceName = true;
+        _deviceNameFocusNode.requestFocus();
       }
     });
   }
@@ -92,10 +95,17 @@ class SettingsPageState extends State<SettingsPage> {
                     Expanded(
                       child: TextField(
                         controller: _deviceNameController,
+                        focusNode: _deviceNameFocusNode,
                         decoration: const InputDecoration(border: InputBorder.none),
                         readOnly: !_isEditingDeviceName,
                         autofocus: _isEditingDeviceName,
                         style: const TextStyle(fontSize: 14),
+                        onSubmitted: (value) {
+                          _saveDeviceName();
+                        },
+                        onEditingComplete: () {
+                          _saveDeviceName();
+                        },
                       ),
                     ),
                     IconButton(
