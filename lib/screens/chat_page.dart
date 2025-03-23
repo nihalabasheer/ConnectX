@@ -262,6 +262,9 @@ class ChatPageState extends State<ChatPage> {
                 'type': 'call_initiation',
                 'peerId': widget.deviceAddress,
               }));
+              Future.delayed(Duration(seconds: 2), () {
+                _sendMessage("Starting video call");
+              });
             },
           ),
         ],
