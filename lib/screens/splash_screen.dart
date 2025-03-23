@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter_p2p_connection/flutter_p2p_connection.dart'; // ✅ Import flutter_p2p_connection
 import 'package:open_settings_plus/open_settings_plus.dart';
 import 'homepage.dart';
 import 'first_time_login.dart';
@@ -14,6 +14,8 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  final FlutterP2pConnection _flutterP2p = FlutterP2pConnection(); // ✅ Initialize Wi-Fi P2P
+
   @override
   void initState() {
     super.initState();
@@ -21,11 +23,19 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> checkWifiStatus() async {
-    var connectivityResult = await Connectivity().checkConnectivity();
+    try {
+      // ✅ Try to start peer discovery. This only works if Wi-Fi is ON
+      bool discoveryStarted = await _flutterP2p.discover();
 
-    if (connectivityResult == ConnectivityResult.wifi) {
-      navigateToNextScreen();
-    } else {
+      if (discoveryStarted) {
+        // ✅ If discovery started successfully (Wi-Fi is ON), proceed to next screen
+        navigateToNextScreen();
+      } else {
+        // ❌ If discovery did not start, show dialog asking user to enable Wi-Fi
+        showWifiDialog();
+      }
+    } catch (e) {
+      // ❌ If error occurs, assume Wi-Fi is OFF and show dialog
       showWifiDialog();
     }
   }
@@ -40,17 +50,16 @@ class _SplashScreenState extends State<SplashScreen> {
           content: const Text('This app requires Wi-Fi to function. Please enable Wi-Fi.'),
           actions: <Widget>[
             TextButton(
-              child: const Text('Open Settings'),
+              child: const Text('Open Wi-Fi Settings'),
               onPressed: () {
-                // ✅ Opens Wi-Fi settings (Android Only)
-                (OpenSettingsPlus.shared as OpenSettingsPlusAndroid).wifi();
+                (OpenSettingsPlus.shared as OpenSettingsPlusAndroid).wifi(); // ✅ Opens Wi-Fi settings
               },
             ),
             TextButton(
               child: const Text('Retry'),
               onPressed: () {
                 Navigator.of(context).pop(); // Close the dialog
-                checkWifiStatus();
+                checkWifiStatus(); // ✅ Check again if Wi-Fi is ON
               },
             ),
           ],
