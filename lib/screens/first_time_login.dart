@@ -75,7 +75,7 @@ class _FirstTimeLoginPageState extends State<FirstTimeLoginPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'Please enter your name:',
+                  'Confirm your device name:',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     fontFamily: 'Roboto',
                     fontSize: 18,
@@ -87,7 +87,7 @@ class _FirstTimeLoginPageState extends State<FirstTimeLoginPage> {
                 TextField(
                   controller: _nameController,
                   decoration: const InputDecoration(
-                    labelText: 'Your Name',
+                    labelText: 'Device Name',
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(),
