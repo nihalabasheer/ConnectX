@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:io'; // To get system default name
 import '../provider/theme_provider.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -15,9 +16,6 @@ class SettingsPageState extends State<SettingsPage> {
   late SharedPreferences _prefs;
   bool _isEditingDeviceName = false;
 
-  final String _defaultDeviceName = "My Device";
-  final String _defaultDownloadPath = "/storage/emulated/0/Download/ConnectX/";
-
   @override
   void initState() {
     super.initState();
@@ -26,13 +24,23 @@ class SettingsPageState extends State<SettingsPage> {
 
   _loadSettings() async {
     _prefs = await SharedPreferences.getInstance();
-    String storedDeviceName = _prefs.getString('device_name') ?? _defaultDeviceName;
-    _deviceNameController = TextEditingController(text: storedDeviceName);
+
+    // Fetch stored device name from SharedPreferences (set in first-time login)
+    String? storedDeviceName = _prefs.getString('userName');
+
+    // Get the system default device name if nothing was stored
+    String systemDeviceName = Platform.localHostname;
+
+    // Use stored name if available, otherwise use the default system name
+    _deviceNameController = TextEditingController(
+      text: storedDeviceName ?? systemDeviceName,
+    );
+
     setState(() {});
   }
 
   _saveDeviceName() async {
-    await _prefs.setString('device_name', _deviceNameController.text);
+    await _prefs.setString('userName', _deviceNameController.text); // Use 'userName' key
     setState(() {
       _isEditingDeviceName = false;
     });
@@ -122,7 +130,7 @@ class SettingsPageState extends State<SettingsPage> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        _defaultDownloadPath,
+                        "/storage/emulated/0/Download/ConnectX/",
                         style: const TextStyle(fontSize: 14),
                         softWrap: false,
                         overflow: TextOverflow.ellipsis,
