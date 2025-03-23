@@ -28,18 +28,15 @@ class _SplashScreenState extends State<SplashScreen> {
       bool discoveryStarted = await _flutterP2p.discover();
 
       if (discoveryStarted) {
-        _flutterP2p.streamPeers().listen((List<DiscoveredPeers> peers) {
-          if (peers.isNotEmpty) {
-            navigateToNextScreen(); // ✅ Wi-Fi is ON and peers discovered
-          } else {
-            showWifiDialog(); // ❌ No peers found, Wi-Fi may still be ON but no devices found
-          }
-        });
+        // ✅ If discovery started successfully (Wi-Fi is ON), proceed to next screen
+        navigateToNextScreen();
       } else {
-        showWifiDialog(); // ❌ Wi-Fi is OFF or failed to start discovery
+        // ❌ If discovery did not start, show dialog asking user to enable Wi-Fi
+        showWifiDialog();
       }
     } catch (e) {
-      showWifiDialog(); // ❌ Error - Assume Wi-Fi is OFF
+      // ❌ If error occurs, assume Wi-Fi is OFF and show dialog
+      showWifiDialog();
     }
   }
 
