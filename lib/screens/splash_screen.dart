@@ -3,6 +3,7 @@ import 'package:flutter_p2p_connection/flutter_p2p_connection.dart'; // ✅ Impo
 import 'package:open_settings_plus/open_settings_plus.dart';
 import 'homepage.dart';
 import 'first_time_login.dart';
+import '../widgets/navigation.dart';
 
 class SplashScreen extends StatefulWidget {
   final bool isFirstTime;
@@ -73,7 +74,7 @@ class _SplashScreenState extends State<SplashScreen> {
       context,
       MaterialPageRoute(
         builder: (context) =>
-        widget.isFirstTime ? FirstTimeLoginPage() : HomePage(),
+        widget.isFirstTime ? FirstTimeLoginPage() : Navigation(),
       ),
     );
   }
