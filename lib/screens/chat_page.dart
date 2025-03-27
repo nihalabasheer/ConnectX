@@ -285,23 +285,46 @@ class ChatPageState extends State<ChatPage> {
             children: [
               Expanded(
                 child: ListView.builder(
+                  padding: const EdgeInsets.all(12),
                   itemCount: _messages.length,
                   itemBuilder: (context, index) {
                     final message = _messages[index];
-                    bool isSender = message.sender == 'Me';
-                    return Align(
-                      alignment: isSender ? Alignment.centerRight : Alignment.centerLeft,
-                      child: Container(
-                        padding: const EdgeInsets.all(8.0),
-                        margin: const EdgeInsets.symmetric(vertical: 4.0),
-                        decoration: BoxDecoration(
-                          color: isSender ? Colors.blue : Colors.grey,
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                        child: Text(
-                          message.message,
-                          style: const TextStyle(color: Colors.white),
-                        ),
+                    final isSender = message.sender == 'Me';
+
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Row(
+                        mainAxisAlignment: isSender ? MainAxisAlignment.end : MainAxisAlignment.start,
+                        children: [
+                          Flexible(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 12,
+                                horizontal: 16,
+                              ),
+                              decoration: BoxDecoration(
+                                color: isSender
+                                    ? Theme.of(context).primaryColor
+                                    : Colors.grey[200],
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 2,
+                                    offset: const Offset(0, 1),
+                                  ),
+                                ],
+                              ),
+                              child: Text(
+                                message.message,
+                                style: TextStyle(
+                                  color: isSender ? Colors.white : Colors.black,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     );
                   },
