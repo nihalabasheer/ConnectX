@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
+import '../screens/savedchatspage.dart';
 import '../screens/wifi_page2.dart';
 import '../screens/settings.dart';
 
@@ -13,6 +14,7 @@ class _NavigationState extends State<Navigation> {
   int _selectedIndex = 0;
   final List<Widget> _pages = [
     WifiPage2(),
+    SavedChatsPage(),
     SettingsPage(),
   ];
 
@@ -65,6 +67,10 @@ class _NavigationState extends State<Navigation> {
                     GButton(
                       icon: Icons.home,
                       text: 'Home',
+                    ),
+                    GButton(
+                      icon: Icons.message,
+                      text: 'Chats',
                     ),
                     GButton(
                       icon: Icons.settings,

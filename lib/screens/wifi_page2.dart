@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:ConnectX/screens/saved_chat.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_p2p_connection/flutter_p2p_connection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,11 +17,10 @@ class WifiPage2 extends StatefulWidget {
   State<WifiPage2> createState() => _WifiPage2State();
 }
 
-class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver,AutomaticKeepAliveClientMixin{
+class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver, AutomaticKeepAliveClientMixin {
   final TextEditingController msgText = TextEditingController();
   final DeviceStorage _deviceStorage = DeviceStorage();
   late Future<List<Device>> savedDevices;
-  //final WifiP2PManager _wifiP2PManager = WifiP2PManager();
   WifiP2PInfo? wifiP2PInfo;
   List<DiscoveredPeers> peers = [];
   StreamSubscription<WifiP2PInfo>? _streamWifiInfo;
@@ -31,24 +29,18 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver,Autom
   @override
   void initState() {
     super.initState();
-    // WifiP2PManager.instance.initialize();
     WidgetsBinding.instance.addObserver(this);
     savedDevices = _deviceStorage.loadSavedDevices();
     _init();
   }
 
   void _init() async {
-    // Initialize the WifiP2PManager instance
-    //await WifiP2PManager.instance.initialize();
-    //await WifiP2PManager.instance.register();
-    // Listen to WifiP2PInfo stream
     _streamWifiInfo = WifiP2PManager.instance.streamWifiP2PInfo().listen((event) {
       setState(() {
-        wifiP2PInfo = event; // Assuming wifiP2PInfo is a member variable
+        wifiP2PInfo = event;
       });
     });
 
-    // Listen to discovered peers stream
     _streamPeers = WifiP2PManager.instance.streamPeers().listen((event) {
       setState(() {
         peers = event;
@@ -56,12 +48,9 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver,Autom
     });
   }
 
-
   @override
   void dispose() {
-    //WifiP2PManager.instance.closeSocketConnection();
     WidgetsBinding.instance.removeObserver(this);
-    //WifiP2PManager.instance.unregister();
     super.dispose();
   }
 
@@ -74,11 +63,9 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver,Autom
     }
   }
 
-
   Future<void> saveOrCheckDevice(String deviceName, String deviceAddress) async {
     await _deviceStorage.saveOrCheckDevice(deviceName, deviceAddress);
     setState(() {
-      // Reload the saved devices after a new device is saved
       savedDevices = _deviceStorage.loadSavedDevices();
     });
   }
@@ -95,11 +82,9 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver,Autom
         },
         transferUpdate: (transfer) {
           if (transfer.completed) {
-            snack(
-                "${transfer.failed ? "failed to ${transfer.receiving ? "receive" : "send"}" : transfer.receiving ? "received" : "sent"}: ${transfer.filename}");
+            snack("${transfer.failed ? "failed to ${transfer.receiving ? "receive" : "send"}" : transfer.receiving ? "received" : "sent"}: ${transfer.filename}");
           }
-          print(
-              "ID: ${transfer.id}, FILENAME: ${transfer.filename}, PATH: ${transfer.path}, COUNT: ${transfer.count}, TOTAL: ${transfer.total}, COMPLETED: ${transfer.completed}, FAILED: ${transfer.failed}, RECEIVING: ${transfer.receiving}");
+          print("ID: ${transfer.id}, FILENAME: ${transfer.filename}, PATH: ${transfer.path}, COUNT: ${transfer.count}, TOTAL: ${transfer.total}, COMPLETED: ${transfer.completed}, FAILED: ${transfer.failed}, RECEIVING: ${transfer.receiving}");
         },
         receiveString: (req) async {
           snack(req);
@@ -120,13 +105,10 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver,Autom
           snack("connected to socket: $address");
         },
         transferUpdate: (transfer) {
-          // if (transfer.count == 0) transfer.cancelToken?.cancel();
           if (transfer.completed) {
-            snack(
-                "${transfer.failed ? "failed to ${transfer.receiving ? "receive" : "send"}" : transfer.receiving ? "received" : "sent"}: ${transfer.filename}");
+            snack("${transfer.failed ? "failed to ${transfer.receiving ? "receive" : "send"}" : transfer.receiving ? "received" : "sent"}: ${transfer.filename}");
           }
-          print(
-              "ID: ${transfer.id}, FILENAME: ${transfer.filename}, PATH: ${transfer.path}, COUNT: ${transfer.count}, TOTAL: ${transfer.total}, COMPLETED: ${transfer.completed}, FAILED: ${transfer.failed}, RECEIVING: ${transfer.receiving}");
+          print("ID: ${transfer.id}, FILENAME: ${transfer.filename}, PATH: ${transfer.path}, COUNT: ${transfer.count}, TOTAL: ${transfer.total}, COMPLETED: ${transfer.completed}, FAILED: ${transfer.failed}, RECEIVING: ${transfer.receiving}");
         },
         receiveString: (req) async {
           snack(req);
@@ -139,9 +121,7 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver,Autom
     bool closed = WifiP2PManager.instance.closeSocket();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(
-          "closed: $closed",
-        ),
+        content: Text("closed: $closed"),
       ),
     );
   }
@@ -160,19 +140,14 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver,Autom
       folderIconColor: Colors.blue,
     );
     if (filePath == null) return;
-    List<TransferUpdate>? updates =
-    await WifiP2PManager.instance.sendFiletoSocket(
-      [
-        filePath,
-      ],
-    );
+    List<TransferUpdate>? updates = await WifiP2PManager.instance.sendFiletoSocket([filePath]);
     print(updates);
   }
 
   Future<void> showWifiOptionsMenu() async {
     await showMenu(
       context: context,
-      position: RelativeRect.fromLTRB(1000.0, 60.0, 10.0, 100.0), // position of the menu
+      position: RelativeRect.fromLTRB(1000.0, 60.0, 10.0, 100.0),
       items: [
         PopupMenuItem(
           child: ListTile(
@@ -332,14 +307,11 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver,Autom
     );
   }
 
-
   void snack(String msg) async {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         duration: const Duration(seconds: 2),
-        content: Text(
-          msg,
-        ),
+        content: Text(msg),
       ),
     );
   }
@@ -381,9 +353,7 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver,Autom
   }
 
   Future<void> requestManageAllFilesPermissionAndSendFile() async {
-    // Request permission to manage all files (MANAGE_EXTERNAL_STORAGE)
     PermissionStatus status = await Permission.manageExternalStorage.request();
-
     if (status.isGranted) {
       await sendFile(true);
     } else {
@@ -394,7 +364,6 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver,Autom
   Future<List<Device>> loadSavedDevices() async {
     final prefs = await SharedPreferences.getInstance();
     final devicesJson = prefs.getStringList('savedDevices') ?? [];
-
     return devicesJson.map((deviceString) {
       final deviceData = deviceString.split(',');
       return Device(deviceName: deviceData[0], deviceAddress: deviceData[1]);
@@ -422,18 +391,16 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver,Autom
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(
-                  "IP: ${wifiP2PInfo == null ? "null" : wifiP2PInfo?.groupOwnerAddress}"),
+              Text("IP: ${wifiP2PInfo == null ? "null" : wifiP2PInfo?.groupOwnerAddress}"),
               wifiP2PInfo != null
-                  ? Text(
-                  "connected: ${wifiP2PInfo?.isConnected}, isGroupOwner: ${wifiP2PInfo?.isGroupOwner}, groupFormed: ${wifiP2PInfo?.groupFormed}, groupOwnerAddress: ${wifiP2PInfo?.groupOwnerAddress}, clients: ${wifiP2PInfo?.clients}")
+                  ? Text("connected: ${wifiP2PInfo?.isConnected}, isGroupOwner: ${wifiP2PInfo?.isGroupOwner}, groupFormed: ${wifiP2PInfo?.groupFormed}, groupOwnerAddress: ${wifiP2PInfo?.groupOwnerAddress}, clients: ${wifiP2PInfo?.clients}")
                   : const SizedBox.shrink(),
               const SizedBox(height: 10),
               const Text("PEERS:"),
               const SizedBox(height: 10),
               ListView.builder(
-                shrinkWrap: true, // Allows the ListView to adjust height dynamically
-                physics: const NeverScrollableScrollPhysics(), // Disables inner scrolling
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
                 itemCount: peers.length,
                 itemBuilder: (context, index) {
                   return Card(
@@ -443,7 +410,7 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver,Autom
                       leading: CircleAvatar(
                         backgroundColor: Colors.grey,
                         child: Text(
-                          peers[index].deviceName[0].toUpperCase(), // First letter of device name
+                          peers[index].deviceName[0].toUpperCase(),
                           style: const TextStyle(color: Colors.white),
                         ),
                       ),
@@ -456,10 +423,8 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver,Autom
                         },
                       ),
                       onTap: () async {
-                        // Attempt to connect to the device
                         bool? connected = await WifiP2PManager.instance.connect(peers[index].deviceAddress);
                         if (connected == true) {
-                          // If connected, navigate to the chat page
                           Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (context) => ChatPage(
@@ -471,63 +436,11 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver,Autom
                           );
                           saveOrCheckDevice(peers[index].deviceName, peers[index].deviceAddress);
                         } else {
-                          // Show a snackbar if the connection fails
                           snack("Failed to connect to ${peers[index].deviceName}");
                         }
                       },
                     ),
                   );
-                },
-              ),
-              const SizedBox(height: 40), // Adds space between sections
-              const Text('SAVED CHATS:'),
-              const SizedBox(height: 40),
-              FutureBuilder<List<Device>>(
-                future: savedDevices,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return const Center(child: Text('Error loading saved devices'));
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Center(child: Text('No saved devices'));
-                  } else {
-                    return ListView.builder(
-                      shrinkWrap: true, // Allows the ListView to adjust height dynamically
-                      physics: const NeverScrollableScrollPhysics(), // Disables inner scrolling
-                      itemCount: snapshot.data!.length,
-                      itemBuilder: (context, index) {
-                        Device device = snapshot.data![index];
-                        return Card(
-                          elevation: 2,
-                          margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
-                          child: ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor: Colors.grey,
-                              child: Text(
-                                device.deviceName[0].toUpperCase(), // First letter of device name
-                                style: const TextStyle(color: Colors.white),
-                              ),
-                            ),
-                            title: Text(device.deviceName),  // Device name as the title
-                            subtitle: Text(device.deviceAddress),
-                            onTap: () {
-                              // Navigate to the ChatPage with the selected device details
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => SavedChat(
-                                    deviceName: device.deviceName,
-                                    deviceAddress: device.deviceAddress,
-                                  ),
-                                ),
-                              );
-                            },// Device address as the subtitle
-                          ),
-                        );
-                      },
-                    );
-                  }
                 },
               ),
             ],
