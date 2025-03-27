@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:ConnectX/screens/saved_chat.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_p2p_connection/flutter_p2p_connection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -515,10 +516,9 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver,Autom
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => ChatPage(
+                                  builder: (context) => SavedChat(
                                     deviceName: device.deviceName,
                                     deviceAddress: device.deviceAddress,
-                                    wifiP2PInfo: wifiP2PInfo,
                                   ),
                                 ),
                               );
