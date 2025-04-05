@@ -12,11 +12,24 @@ class Navigation extends StatefulWidget {
 
 class _NavigationState extends State<Navigation> {
   int _selectedIndex = 0;
-  final List<Widget> _pages = [
-    WifiPage2(),
-    SavedChatsPage(),
-    SettingsPage(),
-  ];
+  late List<Widget> _pages;
+
+  @override
+  void initState() {
+    super.initState();
+    _pages = [
+      const WifiPage2(),
+      SavedChatsPage(key: UniqueKey()),
+      const SettingsPage(),
+    ];
+  }
+
+  void _reloadSavedChats() {
+    // Replace the SavedChatsPage with a new one to trigger a fresh FutureBuilder call
+    setState(() {
+      _pages[1] = SavedChatsPage(key: UniqueKey());
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,39 +41,40 @@ class _NavigationState extends State<Navigation> {
         children: _pages,
       ),
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(18.0), // Prevents sticking to edges
+        padding: const EdgeInsets.all(18.0),
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(30), // ✅ Rounded corners
+            borderRadius: BorderRadius.circular(30),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.2), // ✅ Soft shadow
-                blurRadius: 10, // ✅ Spread of shadow
-                offset: const Offset(2,2), // ✅ Shadow height
+                color: Colors.black.withOpacity(0.2),
+                blurRadius: 10,
+                offset: const Offset(2, 2),
               ),
             ],
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(30), // ✅ Ensures inner rounding
+            borderRadius: BorderRadius.circular(30),
             child: Container(
-              color: isDarkMode ? Colors.black : Colors.white, // Background color
+              color: isDarkMode ? Colors.black : Colors.white,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                 child: GNav(
                   gap: 8,
-                  backgroundColor: Colors.transparent, // ✅ Keeps shadow visible
+                  backgroundColor: Colors.transparent,
                   color: isDarkMode ? Colors.white70 : Colors.grey[800],
                   activeColor: isDarkMode ? Colors.blueAccent : Colors.blue,
-                  tabBackgroundColor: isDarkMode ? Colors.blueGrey[900]! : Colors.blue.withOpacity(0.1),
+                  tabBackgroundColor: isDarkMode
+                      ? Colors.blueGrey[900]!
+                      : Colors.blue.withOpacity(0.1),
                   padding: const EdgeInsets.all(16),
                   selectedIndex: _selectedIndex,
                   onTabChange: (index) {
-                    Future.microtask(() {
-                      if (mounted) {
-                        setState(() {
-                          _selectedIndex = index;
-                        });
-                      }
+                    if (index == 1) {
+                      _reloadSavedChats(); // Refresh saved chats when switching to "Chats"
+                    }
+                    setState(() {
+                      _selectedIndex = index;
                     });
                   },
                   tabs: const [
