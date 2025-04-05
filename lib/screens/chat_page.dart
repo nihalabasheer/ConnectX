@@ -34,10 +34,12 @@ class ChatPageState extends State<ChatPage> {
   String socketStatus = 'Socket inactive';
   bool isVideoCallActive = false;
   final GlobalKey<VideoCallWidgetState> _videoCallKey = GlobalKey();
+  bool _isGroupOwner = false;
 
   @override
   void initState() {
     super.initState();
+    _isGroupOwner = widget.wifiP2PInfo?.isGroupOwner ?? false;
     _loadMessages();
     _checkConnectionAndSocket();
     WifiP2PManager.instance.setMessageHandler(_handleIncomingMessage);
@@ -256,15 +258,12 @@ class ChatPageState extends State<ChatPage> {
             tooltip: 'Start Video Call',
             onPressed: () {
               setState(() {
-                isVideoCallActive = true; // Show video call UI
+                isVideoCallActive = true;
               });
               WifiP2PManager.instance.sendStringToSocket(jsonEncode({
                 'type': 'call_initiation',
                 'peerId': widget.deviceAddress,
               }));
-              Future.delayed(Duration(seconds: 2), () {
-                _sendMessage("Starting video call");
-              });
             },
           ),
         ],
@@ -279,18 +278,44 @@ class ChatPageState extends State<ChatPage> {
           ),
         ),
       ),
-      body: Stack(
+      body: Column(
         children: [
-          Column(
-            children: [
-              Expanded(
-                child: ListView.builder(
+          // Add only this banner (new code)
+          if (socketStatus != 'Socket active' && !_isGroupOwner)
+            Container(
+              color: Colors.orange[100],
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              child: Row(
+                children: [
+                  const Icon(Icons.warning_amber, size: 20, color: Colors.orange),
+                  const SizedBox(width: 8),
+                  const Text('Not connected', style: TextStyle(fontSize: 14)),
+                  const Spacer(),
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: Size.zero,
+                    ),
+                    child: const Text('CONNECT', style: TextStyle(fontSize: 14)),
+                    onPressed: () async {
+                      await connectToSocket();
+                      setState(() => socketStatus = 'Connecting...');
+                    },
+                  ),
+                ],
+              ),
+            ),
+
+          // Original body content wrapped in Expanded
+          Expanded(
+            child: Stack(
+              children: [
+                ListView.builder(
                   padding: const EdgeInsets.all(12),
                   itemCount: _messages.length,
                   itemBuilder: (context, index) {
                     final message = _messages[index];
                     final isSender = message.sender == 'Me';
-
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 8),
                       child: Row(
@@ -298,22 +323,10 @@ class ChatPageState extends State<ChatPage> {
                         children: [
                           Flexible(
                             child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 12,
-                                horizontal: 16,
-                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                               decoration: BoxDecoration(
-                                color: isSender
-                                    ? Theme.of(context).primaryColor
-                                    : Colors.grey[200],
+                                color: isSender ? Theme.of(context).primaryColor : Colors.grey[200],
                                 borderRadius: BorderRadius.circular(16),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
-                                    blurRadius: 2,
-                                    offset: const Offset(0, 1),
-                                  ),
-                                ],
                               ),
                               child: Text(
                                 message.message,
@@ -329,48 +342,43 @@ class ChatPageState extends State<ChatPage> {
                     );
                   },
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.attach_file),
-                      onPressed: () async {
-                        await requestManageAllFilesPermissionAndSendFile();
-                      },
+                if (isVideoCallActive)
+                  Positioned(
+                    bottom: 10,
+                    right: 10,
+                    child: VideoCallWidget(
+                      key: _videoCallKey,
+                      peerId: widget.deviceName,
+                      onEndCall: _endVideoCall,
                     ),
-                    Expanded(
-                      child: TextField(
-                        controller: _controller,
-                        decoration: const InputDecoration(
-                          hintText: 'Type a message',
-                          border: InputBorder.none,
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.send),
-                      onPressed: () {
-                        _sendMessage(_controller.text);
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          // Video Call Overlay
-          if (isVideoCallActive)
-            Positioned(
-              bottom: 80,
-              right: 10,
-              child: VideoCallWidget(
-                key: _videoCallKey,
-                peerId: widget.deviceName,
-                onEndCall: _endVideoCall,
-              ),
+                  ),
+              ],
             ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.attach_file),
+                  onPressed: requestManageAllFilesPermissionAndSendFile,
+                ),
+                Expanded(
+                  child: TextField(
+                    controller: _controller,
+                    decoration: const InputDecoration(
+                      hintText: 'Type a message',
+                      border: InputBorder.none,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.send),
+                  onPressed: () => _sendMessage(_controller.text),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );

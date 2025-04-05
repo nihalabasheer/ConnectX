@@ -152,15 +152,15 @@ class VideoCallWidgetState extends State<VideoCallWidget> {
           const SizedBox(height: 10),
           // Local video stream
           SizedBox(
-            width: 360,
-            height: 270,
+            width: 280,
+            height: 240,
             child: RTCVideoView(_localRenderer),
           ),
           const SizedBox(height: 10),
           // Remote video stream
           SizedBox(
-            width: 360,
-            height: 270,
+            width: 280,
+            height: 240,
             child: RTCVideoView(_remoteRenderer),
           ),
           const SizedBox(height: 10),
