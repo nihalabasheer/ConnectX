@@ -345,7 +345,7 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver, Auto
                       ),
                       onTap: () async {
                         bool? connected = await WifiP2PManager.instance.connect(peers[index].deviceAddress);
-                        if (connected == true) {
+                        if (wifiP2PInfo?.isConnected == true) {
                           Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (context) => ChatPage(
@@ -357,7 +357,7 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver, Auto
                           );
                           saveOrCheckDevice(peers[index].deviceName, peers[index].deviceAddress);
                         } else {
-                          snack("Failed to connect to ${peers[index].deviceName}");
+                          snack("Connecting to ${peers[index].deviceName}");
                         }
                       },
                     ),
