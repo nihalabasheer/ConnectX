@@ -77,53 +77,6 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver, Auto
     await _audioPlayer.play(AssetSource('sounds/connected.mp3'));
   }
 
-  Future startSocket() async {
-    if (wifiP2PInfo != null) {
-      bool started = await WifiP2PManager.instance.startSocket(
-        groupOwnerAddress: wifiP2PInfo!.groupOwnerAddress,
-        downloadPath: "/storage/emulated/0/Download/ConnectX/",
-        maxConcurrentDownloads: 2,
-        deleteOnError: true,
-        onConnect: (name, address) {
-          snack("$name connected to socket with address: $address");
-        },
-        transferUpdate: (transfer) {
-          if (transfer.completed) {
-            snack("${transfer.failed ? "failed to ${transfer.receiving ? "receive" : "send"}" : transfer.receiving ? "received" : "sent"}: ${transfer.filename}");
-          }
-          print("ID: ${transfer.id}, FILENAME: ${transfer.filename}, PATH: ${transfer.path}, COUNT: ${transfer.count}, TOTAL: ${transfer.total}, COMPLETED: ${transfer.completed}, FAILED: ${transfer.failed}, RECEIVING: ${transfer.receiving}");
-        },
-        receiveString: (req) async {
-          snack(req);
-        },
-      );
-      snack("open socket: $started");
-    }
-  }
-
-  Future connectToSocket() async {
-    if (wifiP2PInfo != null) {
-      await WifiP2PManager.instance.connectToSocket(
-        groupOwnerAddress: wifiP2PInfo!.groupOwnerAddress,
-        downloadPath: "/storage/emulated/0/Download/ConnectX/",
-        maxConcurrentDownloads: 3,
-        deleteOnError: true,
-        onConnect: (address) {
-          snack("connected to socket: $address");
-        },
-        transferUpdate: (transfer) {
-          if (transfer.completed) {
-            snack("${transfer.failed ? "failed to ${transfer.receiving ? "receive" : "send"}" : transfer.receiving ? "received" : "sent"}: ${transfer.filename}");
-          }
-          print("ID: ${transfer.id}, FILENAME: ${transfer.filename}, PATH: ${transfer.path}, COUNT: ${transfer.count}, TOTAL: ${transfer.total}, COMPLETED: ${transfer.completed}, FAILED: ${transfer.failed}, RECEIVING: ${transfer.receiving}");
-        },
-        receiveString: (req) async {
-          snack(req);
-        },
-      );
-    }
-  }
-
   Future closeSocketConnection() async {
     bool closed = WifiP2PManager.instance.closeSocket();
     ScaffoldMessenger.of(context).showSnackBar(
@@ -162,7 +115,7 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver, Auto
         expand: false,
         initialChildSize: 0.7,
         minChildSize: 0.4,
-        maxChildSize: 0.95,
+        maxChildSize: 0.90,
         builder: (context, scrollController) => ListView(
           controller: scrollController,
           padding: const EdgeInsets.all(10),
@@ -187,18 +140,6 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver, Auto
               Navigator.pop(context);
               bool? stopped = await WifiP2PManager.instance.stopDiscovery();
               snack(stopped == true ? "Stopped discovery" : "Failed to stop discovery");
-            }),
-            _buildOption("Open a Socket", Icons.cable, () async {
-              Navigator.pop(context);
-              await startSocket();
-            }),
-            _buildOption("Connect to Socket", Icons.input, () async {
-              Navigator.pop(context);
-              await connectToSocket();
-            }),
-            _buildOption("Close Socket", Icons.cancel, () async {
-              Navigator.pop(context);
-              await closeSocketConnection();
             }),
             _buildOption("Create Group", Icons.group_add, () async {
               Navigator.pop(context);
@@ -264,6 +205,10 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver, Auto
               Navigator.pop(context);
               bool? enabled = await WifiP2PManager.instance.checkWifiEnabled();
               snack(enabled == true ? "Wi-Fi is enabled" : "Wi-Fi is disabled");
+            }),
+            _buildOption("Close Socket", Icons.cancel, () async {
+              Navigator.pop(context);
+              await closeSocketConnection();
             }),
           ],
         ),
