@@ -22,7 +22,7 @@ class SavedChatsPage extends StatelessWidget {
           } else if (snapshot.hasError) {
             return const Center(child: Text('Error loading saved devices'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No saved chats available'));
+            return const Center(child: Text('No recent chats available'));
           } else {
             return ListView.builder(
               itemCount: snapshot.data!.length,

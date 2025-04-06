@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
-import '../screens/savedchatspage.dart';
+import '../screens/recentchatspage.dart';
 import '../screens/wifi_page2.dart';
 import '../screens/settings.dart';
 
