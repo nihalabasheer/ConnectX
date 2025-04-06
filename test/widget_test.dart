@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart'; // Add the SharedPreferences import
-import 'package:ConnectX/screens/homepage.dart'; // Correct the import to homepage.dart
+import 'package:ConnectX/screens/homepageold.dart'; // Correct the import to homepageold.dart
 
 void main() {
   testWidgets('Home page displays the correct title and welcome message', (WidgetTester tester) async {

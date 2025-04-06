@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_p2p_connection/flutter_p2p_connection.dart'; // ✅ Import flutter_p2p_connection
 import 'package:open_settings_plus/open_settings_plus.dart';
-import 'homepage.dart';
+import 'homepageold.dart';
 import 'first_time_login.dart';
 import '../widgets/navigation.dart';
 
@@ -15,7 +15,7 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  final FlutterP2pConnection _flutterP2p = FlutterP2pConnection(); // ✅ Initialize Wi-Fi P2P
+  final FlutterP2pConnection _flutterP2p = FlutterP2pConnection();
 
   @override
   void initState() {

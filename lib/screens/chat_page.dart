@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:filesystem_picker/filesystem_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../models/chat_message.dart';
+import '../services/aes.dart';
 import '../services/chat_storage.dart';
 import '../services/wifi_p2p_manager.dart';
 import 'package:flutter_p2p_connection/flutter_p2p_connection.dart';
@@ -81,7 +82,7 @@ class ChatPageState extends State<ChatPage> {
     });
     await _chatStorage.saveChat(widget.deviceAddress, _messages);
     _controller.clear();
-    WifiP2PManager.instance.sendStringToSocket(message);
+    WifiP2PManager.instance.sendStringToSocket(AESHelper.encryptMessage(message));
   }
 
   Future<void> startSocket() async {
@@ -184,7 +185,8 @@ class ChatPageState extends State<ChatPage> {
   }
 
   void _handleTextMessage(String message) {
-    ChatMessage receivedMessage = ChatMessage(sender: 'Other', message: message);
+    String decrypted = AESHelper.decryptMessage(message);
+    ChatMessage receivedMessage = ChatMessage(sender: 'Other', message: decrypted);
     setState(() {
       _messages.add(receivedMessage);
     });
@@ -197,12 +199,12 @@ class ChatPageState extends State<ChatPage> {
       switch (data['type']) {
         case 'call_initiation':
           setState(() {
-            isVideoCallActive = true; // Show video call UI
+            isVideoCallActive = true;
           });
           break;
         case 'call_end':
           setState(() {
-            isVideoCallActive = false; // Hide video call UI
+            isVideoCallActive = false;
           });
           break;
         default:
@@ -225,9 +227,7 @@ class ChatPageState extends State<ChatPage> {
   }
 
   Future<void> requestManageAllFilesPermissionAndSendFile() async {
-    // Request permission to manage all files (MANAGE_EXTERNAL_STORAGE)
     PermissionStatus status = await Permission.manageExternalStorage.request();
-
     if (status.isGranted) {
       await sendFile(true);
     } else {

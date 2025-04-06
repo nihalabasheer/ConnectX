@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../screens/homepage.dart';
+import '../screens/homepageold.dart';
 import 'screens/first_time_login.dart';
 import 'provider/theme_provider.dart';
 import '../services/wifi_p2p_manager.dart';
 import 'screens/splash_screen.dart';
-import 'screens/homepage.dart';
 
 
 void main() async {
@@ -19,7 +18,7 @@ void main() async {
   runApp(
     ChangeNotifierProvider(
       create: (context) => ThemeProvider(),
-      child: MyApp(isFirstTime: isFirstTime), // Correct placement for 'home'
+      child: MyApp(isFirstTime: isFirstTime),
     ),
   );
 }
@@ -48,9 +47,9 @@ class MyApp extends StatelessWidget {
         ),
       ),*/
       theme: ThemeData.light(),
-      darkTheme: ThemeData.dark(), // Optionally define a dark theme
-      themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light, // Apply theme globally
-      home: SplashScreen(isFirstTime: isFirstTime), // Set the splash screen as the first screen,
+      darkTheme: ThemeData.dark(),
+      themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+      home: SplashScreen(isFirstTime: isFirstTime),
     );
   }
 }
