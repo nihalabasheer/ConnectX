@@ -9,6 +9,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'chat_page.dart';
 import '../services/device_info_storage.dart';
 import '../models/device_model.dart';
+import 'package:audioplayers/audioplayers.dart';
+
 
 class WifiPage2 extends StatefulWidget {
   const WifiPage2({super.key});
@@ -25,6 +27,7 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver, Auto
   List<DiscoveredPeers> peers = [];
   StreamSubscription<WifiP2PInfo>? _streamWifiInfo;
   StreamSubscription<List<DiscoveredPeers>>? _streamPeers;
+  final AudioPlayer _audioPlayer = AudioPlayer();
 
   @override
   void initState() {
@@ -68,6 +71,10 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver, Auto
     setState(() {
       savedDevices = _deviceStorage.loadSavedDevices();
     });
+  }
+
+  Future<void> playConnectSound() async {
+    await _audioPlayer.play(AssetSource('sounds/connected.mp3'));
   }
 
   Future startSocket() async {
@@ -342,6 +349,9 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver, Auto
               onPressed: () async {
                 Navigator.of(context).pop();
                 bool? connected = await WifiP2PManager.instance.connect(peer.deviceAddress);
+                if(connected==true){
+                  playConnectSound();
+                }
                 snack("Connected: $connected");
               },
               child: const Text("Connect"),

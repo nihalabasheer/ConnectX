@@ -2,7 +2,7 @@ name: ConnectX
 description: "A new Flutter project."
 publish_to: 'none'
 
-version: 3.7.0+92
+version: 3.8.0+93
 
 environment:
   sdk: ^3.6.0
@@ -27,6 +27,7 @@ dependencies:
   open_settings_plus: ^0.4.0
   google_nav_bar: ^5.0.7
   encrypt: ^5.0.3
+  audioplayers: ^6.4.0
 
 
 dev_dependencies:
@@ -38,4 +39,5 @@ flutter:
   uses-material-design: true
   assets:
     - assets/sounds/tap_sound.mp3
+    - assets/sounds/connected.mp3
     - assets/images/connectx_logo.png
