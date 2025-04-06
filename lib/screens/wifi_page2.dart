@@ -151,168 +151,134 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver, Auto
     print(updates);
   }
 
-  Future<void> showWifiOptionsMenu() async {
-    await showMenu(
+  Future<void> showWifiOptionsBottomSheet() async {
+    showModalBottomSheet(
       context: context,
-      position: RelativeRect.fromLTRB(1000.0, 60.0, 10.0, 100.0),
-      items: [
-        PopupMenuItem(
-          child: ListTile(
-            title: const Text("Check Location Enabled"),
-            onTap: () async {
-              bool? isLocationEnabled = await WifiP2PManager.instance.checkLocationEnabled();
-              snack(isLocationEnabled == true ? "Location is enabled" : "Location is disabled");
-            },
-          ),
-        ),
-        PopupMenuItem(
-          child: ListTile(
-            title: const Text("Check Wi-Fi Enabled"),
-            onTap: () async {
-              bool? isWifiEnabled = await WifiP2PManager.instance.checkWifiEnabled();
-              snack(isWifiEnabled == true ? "Wi-Fi is enabled" : "Wi-Fi is disabled");
-            },
-          ),
-        ),
-        PopupMenuItem(
-          child: ListTile(
-            title: const Text("Ask Location Permission"),
-            onTap: () async {
-              bool permissionGranted = await WifiP2PManager.instance.askLocationPermission();
-              snack(permissionGranted ? "Location permission granted" : "Location permission denied");
-            },
-          ),
-        ),
-        PopupMenuItem(
-          child: ListTile(
-            title: const Text("Ask Storage Permission"),
-            onTap: () async {
-              bool permissionGranted = await WifiP2PManager.instance.askStoragePermission();
-              snack(permissionGranted ? "Storage permission granted" : "Storage permission denied");
-            },
-          ),
-        ),
-        PopupMenuItem(
-          child: ListTile(
-            title: const Text("Enable Location"),
-            onTap: () async {
-              bool locationEnabled = await WifiP2PManager.instance.enableLocationServices();
-              snack(locationEnabled ? "Location enabled" : "Failed to enable location");
-            },
-          ),
-        ),
-        PopupMenuItem(
-          child: ListTile(
-            title: const Text("Enable Wi-Fi"),
-            onTap: () async {
-              bool wifiEnabled = await WifiP2PManager.instance.enableWifiServices();
-              snack(wifiEnabled ? "Wi-Fi enabled" : "Failed to enable Wi-Fi");
-            },
-          ),
-        ),
-        PopupMenuItem(
-          child: ListTile(
-            title: const Text("Create Group"),
-            onTap: () async {
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      isScrollControlled: true,
+      builder: (context) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.7,
+        minChildSize: 0.4,
+        maxChildSize: 0.95,
+        builder: (context, scrollController) => ListView(
+          controller: scrollController,
+          padding: const EdgeInsets.all(10),
+          children: [
+            Center(
+              child: Container(
+                width: 50,
+                height: 5,
+                margin: const EdgeInsets.only(bottom: 15),
+                decoration: BoxDecoration(
+                  color: Colors.grey[400],
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+            _buildOption("Start Discovery", Icons.search, () async {
+              Navigator.pop(context);
+              bool? discovering = await WifiP2PManager.instance.discover();
+              snack(discovering == true ? "Discovery started" : "Discovery failed");
+            }),
+            _buildOption("Stop Discovery", Icons.stop, () async {
+              Navigator.pop(context);
+              bool? stopped = await WifiP2PManager.instance.stopDiscovery();
+              snack(stopped == true ? "Stopped discovery" : "Failed to stop discovery");
+            }),
+            _buildOption("Open a Socket", Icons.cable, () async {
+              Navigator.pop(context);
+              await startSocket();
+            }),
+            _buildOption("Connect to Socket", Icons.input, () async {
+              Navigator.pop(context);
+              await connectToSocket();
+            }),
+            _buildOption("Close Socket", Icons.cancel, () async {
+              Navigator.pop(context);
+              await closeSocketConnection();
+            }),
+            _buildOption("Create Group", Icons.group_add, () async {
+              Navigator.pop(context);
               bool? created = await WifiP2PManager.instance.createGroup();
-              snack(created != null && created ? "Group created" : "Failed to create group");
-            },
-          ),
-        ),
-        PopupMenuItem(
-          child: ListTile(
-            title: const Text("Remove Group/Disconnect"),
-            onTap: () async {
+              snack(created == true ? "Group created" : "Failed to create group");
+            }),
+            _buildOption("Remove Group / Disconnect", Icons.group_off, () async {
+              Navigator.pop(context);
               bool? removed = await WifiP2PManager.instance.removeGroup();
-              snack(removed != null && removed ? "Group removed/disconnected" : "Failed to remove group");
-            },
-          ),
-        ),
-        PopupMenuItem(
-          child: ListTile(
-            title: const Text("Get Group Info"),
-            onTap: () async {
+              snack(removed == true ? "Group removed/disconnected" : "Failed to remove group");
+            }),
+            _buildOption("Get Group Info", Icons.info_outline, () async {
+              Navigator.pop(context);
               var info = await WifiP2PManager.instance.groupInfo();
               showDialog(
                 context: context,
-                builder: (context) => Center(
-                  child: Dialog(
-                    child: SizedBox(
-                      height: 200,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("groupNetworkName: ${info?.groupNetworkName}"),
-                            Text("passPhrase: ${info?.passPhrase}"),
-                            Text("isGroupOwner: ${info?.isGroupOwner}"),
-                            Text("clients: ${info?.clients}"),
-                          ],
-                        ),
-                      ),
-                    ),
+                builder: (context) => AlertDialog(
+                  title: const Text("Group Info"),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Group Name: ${info?.groupNetworkName}"),
+                      Text("Passphrase: ${info?.passPhrase}"),
+                      Text("Is Group Owner: ${info?.isGroupOwner}"),
+                      Text("Clients: ${info?.clients}"),
+                    ],
                   ),
                 ),
               );
-            },
-          ),
-        ),
-        PopupMenuItem(
-          child: ListTile(
-            title: const Text("Get IP"),
-            onTap: () async {
+            }),
+            _buildOption("Get IP Address", Icons.dns, () async {
+              Navigator.pop(context);
               String? ip = await WifiP2PManager.instance.getIPAddress();
-              snack(ip != null ? 'IP: $ip' : 'Failed to get IP');
-            },
-          ),
+              snack(ip != null ? "IP: $ip" : "Failed to get IP");
+            }),
+            _buildOption("Ask Location Permission", Icons.pin_drop, () async {
+              Navigator.pop(context);
+              bool granted = await WifiP2PManager.instance.askLocationPermission();
+              snack(granted ? "Location permission granted" : "Location permission denied");
+            }),
+            _buildOption("Ask Storage Permission", Icons.sd_storage, () async {
+              Navigator.pop(context);
+              bool granted = await WifiP2PManager.instance.askStoragePermission();
+              snack(granted ? "Storage permission granted" : "Storage permission denied");
+            }),
+            _buildOption("Enable Location", Icons.gps_fixed, () async {
+              Navigator.pop(context);
+              bool enabled = await WifiP2PManager.instance.enableLocationServices();
+              snack(enabled ? "Location enabled" : "Failed to enable location");
+            }),
+            _buildOption("Enable Wi-Fi", Icons.wifi_tethering, () async {
+              Navigator.pop(context);
+              bool enabled = await WifiP2PManager.instance.enableWifiServices();
+              snack(enabled ? "Wi-Fi enabled" : "Failed to enable Wi-Fi");
+            }),
+            _buildOption("Check Location Enabled", Icons.location_on, () async {
+              Navigator.pop(context);
+              bool? enabled = await WifiP2PManager.instance.checkLocationEnabled();
+              snack(enabled == true ? "Location is enabled" : "Location is disabled");
+            }),
+            _buildOption("Check Wi-Fi Enabled", Icons.wifi, () async {
+              Navigator.pop(context);
+              bool? enabled = await WifiP2PManager.instance.checkWifiEnabled();
+              snack(enabled == true ? "Wi-Fi is enabled" : "Wi-Fi is disabled");
+            }),
+          ],
         ),
-        PopupMenuItem(
-          child: ListTile(
-            title: const Text("Discover"),
-            onTap: () async {
-              bool? discovering = await WifiP2PManager.instance.discover();
-              snack(discovering != null && discovering ? 'Discovery started' : 'Discovery failed');
-            },
-          ),
-        ),
-        PopupMenuItem(
-          child: ListTile(
-            title: const Text("Stop Discovery"),
-            onTap: () async {
-              bool? stopped = await WifiP2PManager.instance.stopDiscovery();
-              snack(stopped != null && stopped ? 'Stopped discovery' : 'Failed to stop discovery');
-            },
-          ),
-        ),
-        PopupMenuItem(
-          child: ListTile(
-            title: const Text("Open a Socket"),
-            onTap: () async {
-              await startSocket();
-            },
-          ),
-        ),
-        PopupMenuItem(
-          child: ListTile(
-            title: const Text("Connect to Socket"),
-            onTap: () async {
-              await connectToSocket();
-            },
-          ),
-        ),
-        PopupMenuItem(
-          child: ListTile(
-            title: const Text("Close Socket"),
-            onTap: () async {
-              await closeSocketConnection();
-            },
-          ),
-        ),
-      ],
+      ),
     );
   }
+
+  Widget _buildOption(String title, IconData icon, VoidCallback onTap) {
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(title),
+      onTap: onTap,
+    );
+  }
+
 
   void snack(String msg) async {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -388,8 +354,8 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver, Auto
         title: const Text('ConnectX'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.more_vert),
-            onPressed: showWifiOptionsMenu,
+            icon: const Icon(Icons.menu),
+            onPressed: showWifiOptionsBottomSheet,
           ),
         ],
       ),
