@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:io'; // To get system default name
+import 'dart:io';
 import '../provider/theme_provider.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -36,10 +36,7 @@ class SettingsPageState extends State<SettingsPage> {
     _prefs = await SharedPreferences.getInstance();
     String? storedDeviceName = _prefs.getString('userName');
     String systemDeviceName = Platform.localHostname;
-    _deviceNameController = TextEditingController(
-      text: storedDeviceName ?? systemDeviceName,
-    );
-
+    _deviceNameController.text = storedDeviceName ?? systemDeviceName;
     setState(() {});
   }
 
@@ -67,18 +64,47 @@ class SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final themeProvider = Provider.of<ThemeProvider>(context);
     bool isDarkMode = themeProvider.isDarkMode;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: const Text(
+          'ConnectX',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.2,
+          ),
+        ),
+        centerTitle: true,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                theme.colorScheme.primary,
+                theme.colorScheme.primaryContainer,
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: ListView(
           children: [
+            const Text(
+              'Settings',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 20),
+
             const Text(
               "Device Name",
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
@@ -102,12 +128,8 @@ class SettingsPageState extends State<SettingsPage> {
                         readOnly: !_isEditingDeviceName,
                         autofocus: _isEditingDeviceName,
                         style: const TextStyle(fontSize: 14),
-                        onSubmitted: (value) {
-                          _saveDeviceName();
-                        },
-                        onEditingComplete: () {
-                          _saveDeviceName();
-                        },
+                        onSubmitted: (_) => _saveDeviceName(),
+                        onEditingComplete: _saveDeviceName,
                       ),
                     ),
                     IconButton(
