@@ -282,62 +282,262 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver, Auto
     }
   }
 
+  Future<String?> getSmoothIPAddress() async {
+    await Future.delayed(const Duration(milliseconds: 300)); // smooth transition
+    return await WifiP2PManager.instance.getIPAddress();
+  }
+
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     super.build(context);
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('ConnectX'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: showWifiOptionsBottomSheet,
+        appBar: AppBar(
+          title: const Text('ConnectX',
+              style: TextStyle(
+                  fontWeight: FontWeight.bold, letterSpacing: 1.2)),
+          centerTitle: true,
+          actions: [
+            IconButton(
+              icon: Icon(Icons.menu, color: theme.colorScheme.onPrimary),
+              onPressed: showWifiOptionsBottomSheet,
+              tooltip: 'Menu',
+            ),
+          ],
+          flexibleSpace: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  theme.colorScheme.primary,
+                  theme.colorScheme.primaryContainer,
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
           ),
-        ],
-      ),
-      body: Container(
-        padding: EdgeInsets.symmetric(horizontal: 8),
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
+        ),
+        body: Container(
+          padding: const EdgeInsets.all(16),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text("IP: ${wifiP2PInfo == null ? "null" : wifiP2PInfo?.groupOwnerAddress}"),
-              wifiP2PInfo != null
-                  ? Text("connected: ${wifiP2PInfo?.isConnected}, isGroupOwner: ${wifiP2PInfo?.isGroupOwner}, groupFormed: ${wifiP2PInfo?.groupFormed}, groupOwnerAddress: ${wifiP2PInfo?.groupOwnerAddress}, clients: ${wifiP2PInfo?.clients}")
-                  : const SizedBox.shrink(),
-              const SizedBox(height: 10),
-              const Text("PEERS:"),
-              const SizedBox(height: 10),
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: peers.length,
-                itemBuilder: (context, index) {
-                  return Card(
-                    elevation: 2,
-                    margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
-                    child: ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: Colors.grey,
-                        child: Text(
-                          peers[index].deviceName[0].toUpperCase(),
-                          style: const TextStyle(color: Colors.white),
+              // Connection Info Card
+              Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Network Status',
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                      title: Text(peers[index].deviceName),
-                      subtitle: Text("Address: ${peers[index].deviceAddress}"),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.info_outline),
-                        onPressed: () {
-                          showPeerDetailsDialog(context, peers[index]);
-                        },
+                      const SizedBox(height: 8),
+                      _buildInfoRow(
+                        context,
+                        icon: Icons.network_check,
+                        label: 'IP Address',
+                        valueWidget: FutureBuilder<String?>(
+                          future: getSmoothIPAddress(),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return const Text(
+                                'Fetching...',
+                                style: TextStyle(fontStyle: FontStyle.italic),
+                              );
+                            } else if (snapshot.hasError) {
+                              return Text('Error: ${snapshot.error}');
+                            } else {
+                              return Text(
+                                snapshot.data ?? 'Not available',
+                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                ),
+                              );
+                            }
+                          },
+                        ),
+
                       ),
-                      onTap: () async => _handlePeerConnection(context, peers[index]),
-                    ),
-                  );
-                },
+
+                      if (wifiP2PInfo != null) ...[
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 12,
+                          runSpacing: 8,
+                          children: [
+                            _buildStatusChip(
+                              'Connected',
+                              wifiP2PInfo?.isConnected ?? false,
+                              theme,
+                            ),
+                            _buildStatusChip(
+                              'Group Owner',
+                              wifiP2PInfo?.isGroupOwner ?? false,
+                              theme,
+                            ),
+                            _buildStatusChip(
+                              'Group Formed',
+                              wifiP2PInfo?.groupFormed ?? false,
+                              theme,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              // Peers List Header
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Text(
+                  'Available Devices',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: theme.colorScheme.onSurface.withOpacity(0.8),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              // Peers List
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: () async =>
+                  await await WifiP2PManager.instance.discover(),
+                  child: ListView.separated(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    itemCount: peers.length,
+                    separatorBuilder: (context, index) =>
+                    const SizedBox(height: 8),
+                    itemBuilder: (context, index) {
+                      final peer = peers[index];
+                      return _buildPeerCard(context, peer, theme, isDark);
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+        )
+    );
+  }
+
+  Widget _buildStatusChip(String label, bool isActive, ThemeData theme) {
+    return Chip(
+      label: Text(label,
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: isActive ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface,
+          )),
+      backgroundColor: isActive ? theme.colorScheme.primary : theme.colorScheme.surfaceVariant,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide(color: theme.colorScheme.outline.withOpacity(0.2)),
+      ),
+      visualDensity: const VisualDensity(horizontal: -2, vertical: -2),
+    );
+  }
+
+  Widget _buildInfoRow(
+      BuildContext context, {
+        required IconData icon,
+        required String label,
+        String? value,
+        Widget? valueWidget,
+      }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 18, color: Theme.of(context).colorScheme.secondary),
+        const SizedBox(width: 8),
+        Text(
+          '$label: ',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w500,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+        ),
+        valueWidget ??
+            Text(
+              value ?? 'Not available',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+      ],
+    );
+  }
+
+
+  Widget _buildPeerCard(BuildContext context, DiscoveredPeers peer, ThemeData theme, bool isDark) {
+    return Card(
+      elevation: 1,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: theme.colorScheme.outline.withOpacity(0.1),
+          width: 1,
+        ),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () async => _handlePeerConnection(context, peer),
+        splashColor: theme.colorScheme.primary.withOpacity(0.1),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Text(
+                      peer.deviceName[0].toUpperCase(),
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.w600,
+                      )),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(peer.deviceName,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        )),
+                    const SizedBox(height: 4),
+                    Text(peer.deviceAddress,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        )),
+                  ],
+                ),
+              ),
+              IconButton(
+                icon: Icon(Icons.info_outline,
+                    color: theme.colorScheme.onSurfaceVariant),
+                onPressed: () => showPeerDetailsDialog(context, peer),
+                tooltip: 'Device details',
               ),
             ],
           ),
@@ -345,6 +545,8 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver, Auto
       ),
     );
   }
+
+
 
   @override
   bool get wantKeepAlive => true;
