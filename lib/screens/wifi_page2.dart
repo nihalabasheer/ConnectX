@@ -86,24 +86,6 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver, Auto
     );
   }
 
-  Future sendMessage() async {
-    WifiP2PManager.instance.sendStringToSocket(msgText.text);
-  }
-
-  Future sendFile(bool phone) async {
-    String? filePath = await FilesystemPicker.open(
-      context: context,
-      rootDirectory: Directory(phone ? "/storage/emulated/0/" : "/storage/"),
-      fsType: FilesystemType.file,
-      fileTileSelectMode: FileTileSelectMode.wholeTile,
-      showGoUp: true,
-      folderIconColor: Colors.blue,
-    );
-    if (filePath == null) return;
-    List<TransferUpdate>? updates = await WifiP2PManager.instance.sendFiletoSocket([filePath]);
-    print(updates);
-  }
-
   Future<void> showWifiOptionsBottomSheet() async {
     showModalBottomSheet(
       context: context,
@@ -273,15 +255,6 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver, Auto
     );
   }
 
-  Future<void> requestManageAllFilesPermissionAndSendFile() async {
-    PermissionStatus status = await Permission.manageExternalStorage.request();
-    if (status.isGranted) {
-      await sendFile(true);
-    } else {
-      print('Permission denied to manage all files.');
-    }
-  }
-
   Future<List<Device>> loadSavedDevices() async {
     final prefs = await SharedPreferences.getInstance();
     final devicesJson = prefs.getStringList('savedDevices') ?? [];
@@ -289,6 +262,24 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver, Auto
       final deviceData = deviceString.split(',');
       return Device(deviceName: deviceData[0], deviceAddress: deviceData[1]);
     }).toList();
+  }
+
+  void _handlePeerConnection(BuildContext context, DiscoveredPeers peer) async {
+    bool? connected = await WifiP2PManager.instance.connect(peer.deviceAddress);
+    if (wifiP2PInfo?.isConnected == true) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => ChatPage(
+            deviceName: peer.deviceName,
+            deviceAddress: peer.deviceAddress,
+            wifiP2PInfo: wifiP2PInfo,
+          ),
+        ),
+      );
+      saveOrCheckDevice(peer.deviceName, peer.deviceAddress);
+    } else {
+      snack("Connecting to ${peer.deviceName}");
+    }
   }
 
   @override
@@ -343,23 +334,7 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver, Auto
                           showPeerDetailsDialog(context, peers[index]);
                         },
                       ),
-                      onTap: () async {
-                        bool? connected = await WifiP2PManager.instance.connect(peers[index].deviceAddress);
-                        if (wifiP2PInfo?.isConnected == true) {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => ChatPage(
-                                deviceName: peers[index].deviceName,
-                                deviceAddress: peers[index].deviceAddress,
-                                wifiP2PInfo: wifiP2PInfo,
-                              ),
-                            ),
-                          );
-                          saveOrCheckDevice(peers[index].deviceName, peers[index].deviceAddress);
-                        } else {
-                          snack("Connecting to ${peers[index].deviceName}");
-                        }
-                      },
+                      onTap: () async => _handlePeerConnection(context, peers[index]),
                     ),
                   );
                 },
