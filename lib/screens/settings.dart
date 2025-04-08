@@ -20,12 +20,14 @@ class SettingsPageState extends State<SettingsPage> {
   @override
   void initState() {
     super.initState();
+    _deviceNameController = TextEditingController();
     _deviceNameFocusNode = FocusNode();
     _loadSettings();
   }
 
   @override
   void dispose() {
+    _deviceNameController.dispose();
     _deviceNameFocusNode.dispose();
     super.dispose();
   }
