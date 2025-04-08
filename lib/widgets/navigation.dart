@@ -63,7 +63,7 @@ class _NavigationState extends State<Navigation> {
                   gap: 8,
                   backgroundColor: Colors.transparent,
                   color: isDarkMode ? Colors.white70 : Colors.grey[800],
-                  activeColor: isDarkMode ? Colors.blueAccent : Colors.blue,
+                  activeColor: isDarkMode ? Colors.deepPurpleAccent : Colors.deepPurple,
                   tabBackgroundColor: isDarkMode
                       ? Colors.blueGrey[900]!
                       : Colors.blue.withOpacity(0.1),
