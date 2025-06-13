@@ -61,7 +61,7 @@ class ThemeProvider with ChangeNotifier {
         ),
         iconTheme: IconThemeData(color: colorScheme.onPrimary),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: colorScheme.surface,
         elevation: isDark ? 3 : 4,
         margin: const EdgeInsets.all(12),
