@@ -280,7 +280,6 @@ class ChatPageState extends State<ChatPage> {
       ),
       body: Column(
         children: [
-          // Add only this banner (new code)
           if (socketStatus != 'Socket active' && !_isGroupOwner)
             Container(
               color: Colors.orange[100],
@@ -306,7 +305,6 @@ class ChatPageState extends State<ChatPage> {
               ),
             ),
 
-          // Original body content wrapped in Expanded
           Expanded(
             child: Stack(
               children: [

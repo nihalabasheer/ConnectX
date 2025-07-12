@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../screens/settings.dart';
-import 'namechange.dart'; // Import the NameChangeDialog
-import 'package:provider/provider.dart'; // Import provider package
-import '../provider/theme_provider.dart'; // Import the ThemeProvider
+import 'namechange.dart';
+import 'package:provider/provider.dart';
+import '../provider/theme_provider.dart';
 
 class CustomDrawer extends StatefulWidget {
   const CustomDrawer({super.key});
@@ -13,7 +13,7 @@ class CustomDrawer extends StatefulWidget {
 }
 
 class CustomDrawerState extends State<CustomDrawer> {
-  String userName = "User"; // Initial default name
+  String userName = "User";
 
   @override
   void initState() {
@@ -21,7 +21,6 @@ class CustomDrawerState extends State<CustomDrawer> {
     _loadUserName();
   }
 
-  // Function to load username from SharedPreferences
   Future<void> _loadUserName() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -29,7 +28,6 @@ class CustomDrawerState extends State<CustomDrawer> {
     });
   }
 
-  // Function to show the NameChangeDialog
   Future<void> _changeUserName() async {
     showDialog(
       context: context,
@@ -38,7 +36,7 @@ class CustomDrawerState extends State<CustomDrawer> {
           currentUserName: userName,
           onNameChanged: (newUserName) {
             setState(() {
-              userName = newUserName; // Update username in the drawer
+              userName = newUserName;
             });
           },
         );
@@ -48,7 +46,6 @@ class CustomDrawerState extends State<CustomDrawer> {
 
   @override
   Widget build(BuildContext context) {
-    // Access the ThemeProvider to toggle the theme
     final themeProvider = Provider.of<ThemeProvider>(context);
 
     return Drawer(
@@ -59,10 +56,10 @@ class CustomDrawerState extends State<CustomDrawer> {
             accountName: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(userName), // Display current username
+                Text(userName),
                 IconButton(
                   icon: const Icon(Icons.edit),
-                  onPressed: _changeUserName, // Open the dialog to change name
+                  onPressed: _changeUserName,
                 ),
               ],
             ),
@@ -80,7 +77,7 @@ class CustomDrawerState extends State<CustomDrawer> {
               Navigator.pop(context);
               Navigator.push(context,
                   MaterialPageRoute(builder: (context) => const SettingsPage())
-              );// Handle settings navigation if needed
+              );
             },
           ),
           // Theme toggle button
@@ -92,7 +89,6 @@ class CustomDrawerState extends State<CustomDrawer> {
                 ? 'Switch to Light Mode'
                 : 'Switch to Dark Mode'),
             onTap: () {
-              // Toggle the theme mode using the ThemeProvider
               themeProvider.toggleTheme();
             },
           ),

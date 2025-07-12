@@ -2,9 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_p2p_connection/flutter_p2p_connection.dart';
 import '../screens/wifi_page2.dart';
-//import 'package:test_app/services/wifi_managerold.dart';
 import '../widgets/drawer.dart';
-//import 'wifi_page.dart'; // Import the Wi-Fi Page
 import 'chat_page.dart';
 import '../services/wifi_p2p_manager.dart';
 
@@ -16,10 +14,9 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  //final _flutterP2pConnectionPlugin = FlutterP2pConnection();
   WifiP2PInfo? wifiP2PInfo;
   List<DiscoveredPeers> peers = [];
-  List<DiscoveredPeers> connectedDevices = []; // List of connected devices
+  List<DiscoveredPeers> connectedDevices = [];
   StreamSubscription<List<DiscoveredPeers>>? _streamPeers;
   StreamSubscription<WifiP2PInfo>? _streamWifiInfo;
 
@@ -44,18 +41,16 @@ class _HomePageState extends State<HomePage> {
     });
     _streamWifiInfo = WifiP2PManager.instance.streamWifiP2PInfo().listen((event) {
       setState(() {
-        wifiP2PInfo = event; // Assuming wifiP2PInfo is a member variable
+        wifiP2PInfo = event;
       });
     });
-    // Start discovering peers when the page loads
-
   }
 
   void _connectToPeer(DiscoveredPeers peer) async {
     bool? connected = await WifiP2PManager.instance.connect(peer.deviceAddress);
     if (connected == true) {
       setState(() {
-        connectedDevices.add(peer); // Add to connected devices list
+        connectedDevices.add(peer);
       });
     }
     ScaffoldMessenger.of(context).showSnackBar(
@@ -101,13 +96,12 @@ class _HomePageState extends State<HomePage> {
             Column(
               children: [Padding(
                   padding: EdgeInsets.symmetric(vertical: 8.0)),
-                // Displaying the list of discovered peers
                 peers.isEmpty
                     ? const Center(
                   child: Text('No devices found. Searching...'),
                 )
                     : ListView.builder(
-                  shrinkWrap: true, // Makes the list take only the space it needs
+                  shrinkWrap: true,
                   itemCount: peers.length,
                   itemBuilder: (context, index) {
                     final peer = peers[index];
@@ -121,9 +115,9 @@ class _HomePageState extends State<HomePage> {
                     );
                   },
                 ),
-                const SizedBox(height: 20), // Adds space between sections
+                const SizedBox(height: 20),
                 const Text(
-                  'Chats', // Title for the chats section
+                  'Chats',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -134,24 +128,23 @@ class _HomePageState extends State<HomePage> {
                   child: Text('No connected devices.'),
                 )
                     : SizedBox(
-                  height: 200, // Adjust the height as needed
-                  width: MediaQuery.of(context).size.width, // Full width of the screen
+                  height: 200,
+                  width: MediaQuery.of(context).size.width,
                   child: ListView.builder(
                     itemCount: connectedDevices.length,
                     itemBuilder: (context, index) {
                       final device = connectedDevices[index];
                       return ListTile(
                         leading: CircleAvatar(
-                          backgroundColor: Colors.grey, // Placeholder for device avatar
+                          backgroundColor: Colors.grey,
                           child: Text(
-                            device.deviceName[0].toUpperCase(), // First letter of device name
+                            device.deviceName[0].toUpperCase(),
                             style: const TextStyle(color: Colors.white),
                           ),
                         ),
-                        title: Text(device.deviceName), // Device name
-                        subtitle: Text(device.deviceAddress), // Device address
+                        title: Text(device.deviceName),
+                        subtitle: Text(device.deviceAddress),
                         onTap: () {
-                          // Implement navigation to the ChatPage
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -170,7 +163,7 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
           ]),
-      drawer: const CustomDrawer(),  // Include CustomDrawer
+      drawer: const CustomDrawer(),
       drawerEdgeDragWidth: MediaQuery.of(context).size.width * 0.5,
     );
   }

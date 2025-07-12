@@ -3,12 +3,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class NameChangeDialog extends StatefulWidget {
   final String currentUserName;
-  final Function(String) onNameChanged; // Callback function to notify the name change
+  final Function(String) onNameChanged;
 
   const NameChangeDialog({
     super.key,
     required this.currentUserName,
-    required this.onNameChanged, // Accept callback function
+    required this.onNameChanged,
   });
 
   @override
@@ -28,11 +28,10 @@ class NameChangeDialogState extends State<NameChangeDialog> {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('userName', _controller.text);
 
-    // Notify the parent widget (CustomDrawer) about the name change
     widget.onNameChanged(_controller.text);
 
-    if (!mounted) return; // Check if the widget is still in the tree
-    Navigator.pop(context); // Close the dialog
+    if (!mounted) return;
+    Navigator.pop(context);
   }
 
   @override
@@ -46,7 +45,7 @@ class NameChangeDialogState extends State<NameChangeDialog> {
       actions: [
         TextButton(
           onPressed: () {
-            Navigator.pop(context); // Close the dialog without saving
+            Navigator.pop(context);
           },
           child: const Text('Cancel'),
         ),

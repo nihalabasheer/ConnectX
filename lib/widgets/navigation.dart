@@ -25,7 +25,6 @@ class _NavigationState extends State<Navigation> {
   }
 
   void _reloadSavedChats() {
-    // Replace the SavedChatsPage with a new one to trigger a fresh FutureBuilder call
     setState(() {
       _pages[1] = SavedChatsPage(key: UniqueKey());
     });
@@ -71,7 +70,7 @@ class _NavigationState extends State<Navigation> {
                   selectedIndex: _selectedIndex,
                   onTabChange: (index) {
                     if (index == 1) {
-                      _reloadSavedChats(); // Refresh saved chats when switching to "Chats"
+                      _reloadSavedChats();
                     }
                     setState(() {
                       _selectedIndex = index;

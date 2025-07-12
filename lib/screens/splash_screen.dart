@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_p2p_connection/flutter_p2p_connection.dart'; // ✅ Import flutter_p2p_connection
+import 'package:flutter_p2p_connection/flutter_p2p_connection.dart';
 import 'package:open_settings_plus/open_settings_plus.dart';
-import 'homepageold.dart';
 import 'first_time_login.dart';
 import '../widgets/navigation.dart';
 
@@ -25,18 +24,14 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> checkWifiStatus() async {
     try {
-      // ✅ Try to start peer discovery. This only works if Wi-Fi is ON
       bool discoveryStarted = await _flutterP2p.discover();
 
       if (discoveryStarted) {
-        // ✅ If discovery started successfully (Wi-Fi is ON), proceed to next screen
         navigateToNextScreen();
       } else {
-        // ❌ If discovery did not start, show dialog asking user to enable Wi-Fi
         showWifiDialog();
       }
     } catch (e) {
-      // ❌ If error occurs, assume Wi-Fi is OFF and show dialog
       showWifiDialog();
     }
   }
@@ -44,7 +39,7 @@ class _SplashScreenState extends State<SplashScreen> {
   void showWifiDialog() {
     showDialog(
       context: context,
-      barrierDismissible: false, // User must interact with the dialog
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Wi-Fi Required'),
@@ -53,14 +48,14 @@ class _SplashScreenState extends State<SplashScreen> {
             TextButton(
               child: const Text('Open Wi-Fi Settings'),
               onPressed: () {
-                (OpenSettingsPlus.shared as OpenSettingsPlusAndroid).wifi(); // ✅ Opens Wi-Fi settings
+                (OpenSettingsPlus.shared as OpenSettingsPlusAndroid).wifi();
               },
             ),
             TextButton(
               child: const Text('Retry'),
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-                checkWifiStatus(); // ✅ Check again if Wi-Fi is ON
+                Navigator.of(context).pop();
+                checkWifiStatus();
               },
             ),
           ],

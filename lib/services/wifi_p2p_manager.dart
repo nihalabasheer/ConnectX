@@ -895,12 +895,10 @@ class WifiP2PManager {
 
   Function(dynamic)? _messageHandler;
 
-  // Set a callback for incoming messages
   void setMessageHandler(Function(dynamic) handler) {
     _messageHandler = handler;
   }
 
-  // Example of how to call the message handler when a message is received
   void _onMessageReceived(dynamic message) {
     if (_messageHandler != null) {
       _messageHandler!(message);

@@ -324,7 +324,6 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver, Auto
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Connection Info Card
               Card(
                 elevation: 2,
                 shape: RoundedRectangleBorder(

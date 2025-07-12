@@ -1,7 +1,6 @@
 import 'package:ConnectX/widgets/navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'homepageold.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'dart:io';
 
@@ -24,7 +23,7 @@ class _FirstTimeLoginPageState extends State<FirstTimeLoginPage> {
   }
 
   void _getDeviceName() async {
-    String deviceName = 'User'; // Default value if device name is not available
+    String deviceName = 'User';
 
     if (Platform.isAndroid) {
       final androidInfo = await deviceInfoPlugin.androidInfo;
@@ -35,7 +34,7 @@ class _FirstTimeLoginPageState extends State<FirstTimeLoginPage> {
     }
 
     if (mounted) {
-      _nameController.text = deviceName; // Set the fetched device name
+      _nameController.text = deviceName;
     }
   }
 
@@ -63,7 +62,7 @@ class _FirstTimeLoginPageState extends State<FirstTimeLoginPage> {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.white, Color(0xFFEFEFEF)], // Subtle gray gradient
+            colors: [Colors.white, Color(0xFFEFEFEF)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),

@@ -9,16 +9,14 @@ class Device {
     required this.deviceAddress,
   });
 
-  // Method to convert Device object to JSON string
   String toJsonString() {
     final Map<String, dynamic> data = {
       'deviceName': deviceName,
       'deviceAddress': deviceAddress,
     };
-    return jsonEncode(data); // Encode the map into a JSON string
+    return jsonEncode(data);
   }
 
-  // Factory method to create Device from JSON string
   factory Device.fromJsonString(String jsonString) {
     final Map<String, dynamic> data = jsonDecode(jsonString);
     return Device(
