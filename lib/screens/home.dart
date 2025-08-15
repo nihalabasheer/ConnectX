@@ -438,28 +438,15 @@ class _WifiPage2State extends State<Home>
   }
 
   Widget _buildNetworkStatusCard() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.2),
-          width: 1,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildNetworkStatusHeader(),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildNetworkStatusHeader(),
+        if (wifiP2PInfo != null) ...[
           const SizedBox(height: 16),
-          _buildIPAddressRow(),
-          if (wifiP2PInfo != null) ...[
-            const SizedBox(height: 16),
-            _buildStatusChips(),
-          ],
+          _buildStatusChips(),
         ],
-      ),
+      ],
     );
   }
 
@@ -491,66 +478,9 @@ class _WifiPage2State extends State<Home>
     );
   }
 
-  Widget _buildIPAddressRow() {
-    return _buildNetworkInfoRow(
-      icon: Icons.public_rounded,
-      label: 'IP Address',
-      valueWidget: FutureBuilder<String?>(
-        future: getSmoothIPAddress(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return _buildStatusBadge(
-              'Fetching...',
-              Colors.orange,
-              0.2,
-              0.3,
-            );
-          }
-          return _buildStatusBadge(
-            snapshot.data ?? 'Not available',
-            snapshot.hasData ? const Color(0xFF93C5FD) : Colors.red,
-            snapshot.hasData ? 0.3 : 0.2,
-            snapshot.hasData ? 0.5 : 0.3,
-            textColor: snapshot.hasData
-                ? const Color.fromARGB(255, 251, 251, 251)
-                : Colors.red,
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildStatusBadge(
-    String text,
-    Color color,
-    double backgroundAlpha,
-    double borderAlpha, {
-    Color? textColor,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: backgroundAlpha),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: color.withValues(alpha: borderAlpha),
-        ),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: textColor ?? color,
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-    );
-  }
-
   Widget _buildStatusChips() {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         _buildStatusIconButton(
           icon: Icons.wifi_rounded,
