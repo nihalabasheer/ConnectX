@@ -2,7 +2,7 @@ name: ConnectX
 description: "A new Flutter project."
 publish_to: 'none'
 
-version: 3.10.5+104
+version: 3.10.6+105
 
 environment:
   sdk: ^3.6.0

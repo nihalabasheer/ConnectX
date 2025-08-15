@@ -1,24 +1,21 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_p2p_connection/flutter_p2p_connection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/wifi_p2p_manager.dart';
 import 'dart:async';
-import 'package:filesystem_picker/filesystem_picker.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'chat_page.dart';
 import '../services/device_info_storage.dart';
 import '../models/device_model.dart';
 import 'package:audioplayers/audioplayers.dart';
 
-class WifiPage2 extends StatefulWidget {
-  const WifiPage2({super.key});
+class Home extends StatefulWidget {
+  const Home({super.key});
 
   @override
-  State<WifiPage2> createState() => _WifiPage2State();
+  State<Home> createState() => _WifiPage2State();
 }
 
-class _WifiPage2State extends State<WifiPage2>
+class _WifiPage2State extends State<Home>
     with WidgetsBindingObserver, AutomaticKeepAliveClientMixin {
   final TextEditingController msgText = TextEditingController();
   final DeviceStorage _deviceStorage = DeviceStorage();
@@ -304,8 +301,7 @@ class _WifiPage2State extends State<WifiPage2>
   }
 
   Future<String?> getSmoothIPAddress() async {
-    await Future.delayed(
-        const Duration(milliseconds: 300)); // smooth transition
+    await Future.delayed(const Duration(milliseconds: 300));
     return await WifiP2PManager.instance.getIPAddress();
   }
 
@@ -423,7 +419,6 @@ class _WifiPage2State extends State<WifiPage2>
                 ),
               ),
               const SizedBox(height: 24),
-              // Peers List Header
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: Text(
@@ -435,7 +430,6 @@ class _WifiPage2State extends State<WifiPage2>
                 ),
               ),
               const SizedBox(height: 16),
-              // Peers List
               Expanded(
                 child: RefreshIndicator(
                   onRefresh: () async =>

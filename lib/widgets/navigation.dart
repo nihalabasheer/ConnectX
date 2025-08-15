@@ -8,10 +8,10 @@ import '../screens/settings.dart';
 class Navigation extends StatefulWidget {
   const Navigation({super.key});
   @override
-  _NavigationState createState() => _NavigationState();
+  NavigationState createState() => NavigationState();
 }
 
-class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
+class NavigationState extends State<Navigation> with TickerProviderStateMixin {
   int _selectedIndex = 0;
   late List<Widget> _pages;
   late AnimationController _animationController;
@@ -22,7 +22,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _pages = [
-      const WifiPage2(),
+      const Home(),
       SavedChatsPage(key: UniqueKey()),
       const SettingsPage(),
     ];
@@ -78,7 +78,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             child: Transform.scale(
               scale: _scaleAnimation.value,
               child: Container(
-                margin: const EdgeInsets.fromLTRB(20, 0, 20, 35),
+                margin: const EdgeInsets.fromLTRB(60, 0, 60, 20),
                 height: 75,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
