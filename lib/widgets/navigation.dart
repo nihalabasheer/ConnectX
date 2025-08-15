@@ -23,8 +23,14 @@ class NavigationState extends State<Navigation> with TickerProviderStateMixin {
     super.initState();
     _pages = [
       const Home(),
-      SavedChatsPage(key: UniqueKey()),
-      const SettingsPage(),
+      Container(
+        color: Colors.transparent,
+        child: SavedChatsPage(key: UniqueKey()),
+      ),
+      Container(
+        color: Colors.transparent,
+        child: const SettingsPage(),
+      ),
     ];
 
     _animationController = AnimationController(
@@ -59,92 +65,114 @@ class NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
   void _reloadSavedChats() {
     setState(() {
-      _pages[1] = SavedChatsPage(key: UniqueKey());
+      _pages[1] = Container(
+        color: Colors.transparent,
+        child: SavedChatsPage(key: UniqueKey()),
+      );
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _pages,
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF1E3A8A),
+            Color(0xFF3B82F6),
+            Color(0xFF1D4ED8),
+            Color(0xFF1E40AF),
+          ],
+          stops: [0.0, 0.3, 0.7, 1.0],
+        ),
       ),
-      bottomNavigationBar: AnimatedBuilder(
-        animation: _animationController,
-        builder: (context, child) {
-          return Transform.translate(
-            offset: Offset(0, 100 * (1 - _slideAnimation.value)),
-            child: Transform.scale(
-              scale: _scaleAnimation.value,
-              child: Container(
-                margin: const EdgeInsets.fromLTRB(60, 0, 60, 20),
-                height: 75,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Colors.white.withOpacity(0.95),
-                      const Color(0xFFF1F5F9).withOpacity(0.95),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: IndexedStack(
+          index: _selectedIndex,
+          children: _pages,
+        ),
+        bottomNavigationBar: AnimatedBuilder(
+          animation: _animationController,
+          builder: (context, child) {
+            return Transform.translate(
+              offset: Offset(0, 100 * (1 - _slideAnimation.value)),
+              child: Transform.scale(
+                scale: _scaleAnimation.value,
+                child: Container(
+                  margin: const EdgeInsets.fromLTRB(60, 0, 60, 20),
+                  height: 75,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Color(0xFF1E3A8A),
+                        Color(0xFF3B82F6),
+                        Color(0xFF1D4ED8),
+                        Color(0xFF1E40AF),
+                      ],
+                      stops: [0.0, 0.3, 0.7, 1.0],
+                    ),
+                    borderRadius: BorderRadius.circular(25),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      width: 1,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF1E40AF).withValues(alpha: 0.3),
+                        blurRadius: 25,
+                        offset: const Offset(0, 8),
+                        spreadRadius: 0,
+                      ),
+                      BoxShadow(
+                        color: Colors.white.withValues(alpha: 0.1),
+                        blurRadius: 1,
+                        offset: const Offset(0, 1),
+                        spreadRadius: 0,
+                      ),
                     ],
                   ),
-                  borderRadius: BorderRadius.circular(25),
-                  border: Border.all(
-                    color: Colors.black.withOpacity(0.05),
-                    width: 1,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF64748B).withOpacity(0.15),
-                      blurRadius: 25,
-                      offset: const Offset(0, 8),
-                      spreadRadius: 0,
-                    ),
-                    BoxShadow(
-                      color: Colors.white.withOpacity(0.8),
-                      blurRadius: 1,
-                      offset: const Offset(0, 1),
-                      spreadRadius: 0,
-                    ),
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(25),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.3),
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          _buildNavItem(
-                            icon: Icons.home_rounded,
-                            label: 'Home',
-                            index: 0,
-                          ),
-                          _buildNavItem(
-                            icon: Icons.chat_bubble_rounded,
-                            label: 'Chats',
-                            index: 1,
-                          ),
-                          _buildNavItem(
-                            icon: Icons.settings_rounded,
-                            label: 'Settings',
-                            index: 2,
-                          ),
-                        ],
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(25),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            _buildNavItem(
+                              icon: Icons.home_rounded,
+                              label: 'Home',
+                              index: 0,
+                            ),
+                            _buildNavItem(
+                              icon: Icons.chat_bubble_rounded,
+                              label: 'Chats',
+                              index: 1,
+                            ),
+                            _buildNavItem(
+                              icon: Icons.settings_rounded,
+                              label: 'Settings',
+                              index: 2,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
@@ -170,28 +198,7 @@ class NavigationState extends State<Navigation> with TickerProviderStateMixin {
         duration: const Duration(milliseconds: 50),
         curve: Curves.easeOutCubic,
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        decoration: BoxDecoration(
-          gradient: isSelected
-              ? const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Color(0xFF6366F1),
-                    Color(0xFF8B5CF6),
-                  ],
-                )
-              : null,
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: const Color(0xFF6366F1).withOpacity(0.4),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
-              : null,
-        ),
+        decoration: const BoxDecoration(),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -201,7 +208,9 @@ class NavigationState extends State<Navigation> with TickerProviderStateMixin {
               child: Icon(
                 icon,
                 size: 24,
-                color: isSelected ? Colors.white : Colors.grey[600],
+                color: isSelected
+                    ? Colors.white
+                    : Colors.white.withValues(alpha: 0.5),
               ),
             ),
             const SizedBox(height: 4),
@@ -210,7 +219,9 @@ class NavigationState extends State<Navigation> with TickerProviderStateMixin {
               style: TextStyle(
                 fontSize: isSelected ? 12 : 11,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                color: isSelected ? Colors.white : Colors.grey[600],
+                color: isSelected
+                    ? Colors.white
+                    : Colors.white.withValues(alpha: 0.5),
               ),
               child: Text(label),
             ),
