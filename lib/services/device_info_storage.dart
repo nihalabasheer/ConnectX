@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/device_model.dart';
 
@@ -49,8 +48,10 @@ class DeviceStorage {
     return false;
   }
 
-  Future<void> saveOrCheckDevice(String deviceName, String deviceAddress) async {
-    Device device = Device(deviceName: deviceName, deviceAddress: deviceAddress);
+  Future<void> saveOrCheckDevice(
+      String deviceName, String deviceAddress) async {
+    Device device =
+        Device(deviceName: deviceName, deviceAddress: deviceAddress);
     bool deviceSaved = await isDeviceSaved(device);
 
     if (!deviceSaved) {

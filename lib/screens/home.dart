@@ -11,7 +11,6 @@ import '../services/device_info_storage.dart';
 import '../models/device_model.dart';
 import 'package:audioplayers/audioplayers.dart';
 
-
 class WifiPage2 extends StatefulWidget {
   const WifiPage2({super.key});
 
@@ -19,7 +18,8 @@ class WifiPage2 extends StatefulWidget {
   State<WifiPage2> createState() => _WifiPage2State();
 }
 
-class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver, AutomaticKeepAliveClientMixin {
+class _WifiPage2State extends State<WifiPage2>
+    with WidgetsBindingObserver, AutomaticKeepAliveClientMixin {
   final TextEditingController msgText = TextEditingController();
   final DeviceStorage _deviceStorage = DeviceStorage();
   late Future<List<Device>> savedDevices;
@@ -38,7 +38,8 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver, Auto
   }
 
   void _init() async {
-    _streamWifiInfo = WifiP2PManager.instance.streamWifiP2PInfo().listen((event) {
+    _streamWifiInfo =
+        WifiP2PManager.instance.streamWifiP2PInfo().listen((event) {
       setState(() {
         wifiP2PInfo = event;
       });
@@ -66,7 +67,8 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver, Auto
     }
   }
 
-  Future<void> saveOrCheckDevice(String deviceName, String deviceAddress) async {
+  Future<void> saveOrCheckDevice(
+      String deviceName, String deviceAddress) async {
     await _deviceStorage.saveOrCheckDevice(deviceName, deviceAddress);
     setState(() {
       savedDevices = _deviceStorage.loadSavedDevices();
@@ -116,22 +118,30 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver, Auto
             _buildOption("Start Discovery", Icons.search, () async {
               Navigator.pop(context);
               bool? discovering = await WifiP2PManager.instance.discover();
-              snack(discovering == true ? "Discovery started" : "Discovery failed");
+              snack(discovering == true
+                  ? "Discovery started"
+                  : "Discovery failed");
             }),
             _buildOption("Stop Discovery", Icons.stop, () async {
               Navigator.pop(context);
               bool? stopped = await WifiP2PManager.instance.stopDiscovery();
-              snack(stopped == true ? "Stopped discovery" : "Failed to stop discovery");
+              snack(stopped == true
+                  ? "Stopped discovery"
+                  : "Failed to stop discovery");
             }),
             _buildOption("Create Group", Icons.group_add, () async {
               Navigator.pop(context);
               bool? created = await WifiP2PManager.instance.createGroup();
-              snack(created == true ? "Group created" : "Failed to create group");
+              snack(
+                  created == true ? "Group created" : "Failed to create group");
             }),
-            _buildOption("Remove Group / Disconnect", Icons.group_off, () async {
+            _buildOption("Remove Group / Disconnect", Icons.group_off,
+                () async {
               Navigator.pop(context);
               bool? removed = await WifiP2PManager.instance.removeGroup();
-              snack(removed == true ? "Group removed/disconnected" : "Failed to remove group");
+              snack(removed == true
+                  ? "Group removed/disconnected"
+                  : "Failed to remove group");
             }),
             _buildOption("Get Group Info", Icons.info_outline, () async {
               Navigator.pop(context);
@@ -160,17 +170,24 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver, Auto
             }),
             _buildOption("Ask Location Permission", Icons.pin_drop, () async {
               Navigator.pop(context);
-              bool granted = await WifiP2PManager.instance.askLocationPermission();
-              snack(granted ? "Location permission granted" : "Location permission denied");
+              bool granted =
+                  await WifiP2PManager.instance.askLocationPermission();
+              snack(granted
+                  ? "Location permission granted"
+                  : "Location permission denied");
             }),
             _buildOption("Ask Storage Permission", Icons.sd_storage, () async {
               Navigator.pop(context);
-              bool granted = await WifiP2PManager.instance.askStoragePermission();
-              snack(granted ? "Storage permission granted" : "Storage permission denied");
+              bool granted =
+                  await WifiP2PManager.instance.askStoragePermission();
+              snack(granted
+                  ? "Storage permission granted"
+                  : "Storage permission denied");
             }),
             _buildOption("Enable Location", Icons.gps_fixed, () async {
               Navigator.pop(context);
-              bool enabled = await WifiP2PManager.instance.enableLocationServices();
+              bool enabled =
+                  await WifiP2PManager.instance.enableLocationServices();
               snack(enabled ? "Location enabled" : "Failed to enable location");
             }),
             _buildOption("Enable Wi-Fi", Icons.wifi_tethering, () async {
@@ -180,8 +197,11 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver, Auto
             }),
             _buildOption("Check Location Enabled", Icons.location_on, () async {
               Navigator.pop(context);
-              bool? enabled = await WifiP2PManager.instance.checkLocationEnabled();
-              snack(enabled == true ? "Location is enabled" : "Location is disabled");
+              bool? enabled =
+                  await WifiP2PManager.instance.checkLocationEnabled();
+              snack(enabled == true
+                  ? "Location is enabled"
+                  : "Location is disabled");
             }),
             _buildOption("Check Wi-Fi Enabled", Icons.wifi, () async {
               Navigator.pop(context);
@@ -206,7 +226,6 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver, Auto
     );
   }
 
-
   void snack(String msg) async {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -230,7 +249,8 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver, Auto
                 Text("name: ${peer.deviceName}"),
                 Text("address: ${peer.deviceAddress}"),
                 Text("isGroupOwner: ${peer.isGroupOwner}"),
-                Text("isServiceDiscoveryCapable: ${peer.isServiceDiscoveryCapable}"),
+                Text(
+                    "isServiceDiscoveryCapable: ${peer.isServiceDiscoveryCapable}"),
                 Text("primaryDeviceType: ${peer.primaryDeviceType}"),
                 Text("secondaryDeviceType: ${peer.secondaryDeviceType}"),
                 Text("status: ${peer.status}"),
@@ -241,8 +261,9 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver, Auto
             TextButton(
               onPressed: () async {
                 Navigator.of(context).pop();
-                bool? connected = await WifiP2PManager.instance.connect(peer.deviceAddress);
-                if(connected==true){
+                bool? connected =
+                    await WifiP2PManager.instance.connect(peer.deviceAddress);
+                if (connected == true) {
                   playConnectSound();
                 }
                 snack("Connected: $connected");
@@ -283,10 +304,10 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver, Auto
   }
 
   Future<String?> getSmoothIPAddress() async {
-    await Future.delayed(const Duration(milliseconds: 300)); // smooth transition
+    await Future.delayed(
+        const Duration(milliseconds: 300)); // smooth transition
     return await WifiP2PManager.instance.getIPAddress();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -296,8 +317,8 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver, Auto
     return Scaffold(
         appBar: AppBar(
           title: const Text('ConnectX',
-              style: TextStyle(
-                  fontWeight: FontWeight.bold, letterSpacing: 1.2)),
+              style:
+                  TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.2)),
           centerTitle: true,
           actions: [
             IconButton(
@@ -349,7 +370,8 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver, Auto
                         valueWidget: FutureBuilder<String?>(
                           future: getSmoothIPAddress(),
                           builder: (context, snapshot) {
-                            if (snapshot.connectionState == ConnectionState.waiting) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
                               return const Text(
                                 'Fetching...',
                                 style: TextStyle(fontStyle: FontStyle.italic),
@@ -359,16 +381,19 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver, Auto
                             } else {
                               return Text(
                                 snapshot.data ?? 'Not available',
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant,
+                                    ),
                               );
                             }
                           },
                         ),
-
                       ),
-
                       if (wifiP2PInfo != null) ...[
                         const SizedBox(height: 8),
                         Wrap(
@@ -414,13 +439,13 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver, Auto
               Expanded(
                 child: RefreshIndicator(
                   onRefresh: () async =>
-                  await await WifiP2PManager.instance.discover(),
+                      await await WifiP2PManager.instance.discover(),
                   child: ListView.separated(
                     physics: const AlwaysScrollableScrollPhysics(),
                     shrinkWrap: true,
                     itemCount: peers.length,
                     separatorBuilder: (context, index) =>
-                    const SizedBox(height: 8),
+                        const SizedBox(height: 8),
                     itemBuilder: (context, index) {
                       final peer = peers[index];
                       return _buildPeerCard(context, peer, theme, isDark);
@@ -430,17 +455,20 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver, Auto
               ),
             ],
           ),
-        )
-    );
+        ));
   }
 
   Widget _buildStatusChip(String label, bool isActive, ThemeData theme) {
     return Chip(
       label: Text(label,
           style: theme.textTheme.labelSmall?.copyWith(
-            color: isActive ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface,
+            color: isActive
+                ? theme.colorScheme.onPrimary
+                : theme.colorScheme.onSurface,
           )),
-      backgroundColor: isActive ? theme.colorScheme.primary : theme.colorScheme.surfaceVariant,
+      backgroundColor: isActive
+          ? theme.colorScheme.primary
+          : theme.colorScheme.surfaceVariant,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
         side: BorderSide(color: theme.colorScheme.outline.withOpacity(0.2)),
@@ -450,12 +478,12 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver, Auto
   }
 
   Widget _buildInfoRow(
-      BuildContext context, {
-        required IconData icon,
-        required String label,
-        String? value,
-        Widget? valueWidget,
-      }) {
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    String? value,
+    Widget? valueWidget,
+  }) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -464,23 +492,23 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver, Auto
         Text(
           '$label: ',
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w500,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
+                fontWeight: FontWeight.w500,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
         ),
         valueWidget ??
             Text(
               value ?? 'Not available',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
             ),
       ],
     );
   }
 
-
-  Widget _buildPeerCard(BuildContext context, DiscoveredPeers peer, ThemeData theme, bool isDark) {
+  Widget _buildPeerCard(BuildContext context, DiscoveredPeers peer,
+      ThemeData theme, bool isDark) {
     return Card(
       elevation: 1,
       margin: EdgeInsets.zero,
@@ -507,8 +535,7 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver, Auto
                   shape: BoxShape.circle,
                 ),
                 child: Center(
-                  child: Text(
-                      peer.deviceName[0].toUpperCase(),
+                  child: Text(peer.deviceName[0].toUpperCase(),
                       style: theme.textTheme.titleMedium?.copyWith(
                         color: theme.colorScheme.primary,
                         fontWeight: FontWeight.w600,
@@ -544,8 +571,6 @@ class _WifiPage2State extends State<WifiPage2> with WidgetsBindingObserver, Auto
       ),
     );
   }
-
-
 
   @override
   bool get wantKeepAlive => true;
