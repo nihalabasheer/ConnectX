@@ -71,9 +71,6 @@ class SavedChatsPage extends StatelessWidget {
                   child: Column(
                     children: [
                       // Section Header
-                      const Padding(
-                        padding: EdgeInsets.all(20.0),
-                      ),
 
                       // Chats List
                       Expanded(
@@ -143,7 +140,7 @@ class SavedChatsPage extends StatelessWidget {
                             } else {
                               return ListView.builder(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 24.0),
+                                    horizontal: 24.0, vertical: 24.0),
                                 itemCount: snapshot.data!.length,
                                 itemBuilder: (context, index) {
                                   Device device = snapshot.data![index];

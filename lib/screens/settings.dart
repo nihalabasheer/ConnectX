@@ -1,197 +1,196 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:io';
-import '../provider/theme_provider.dart';
 
-class SettingsPage extends StatefulWidget {
+class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
   @override
-  SettingsPageState createState() => SettingsPageState();
-}
-
-class SettingsPageState extends State<SettingsPage> {
-  late TextEditingController _deviceNameController;
-  late SharedPreferences _prefs;
-  bool _isEditingDeviceName = false;
-  late FocusNode _deviceNameFocusNode;
-
-  @override
-  void initState() {
-    super.initState();
-    _deviceNameController = TextEditingController();
-    _deviceNameFocusNode = FocusNode();
-    _loadSettings();
-  }
-
-  @override
-  void dispose() {
-    _deviceNameController.dispose();
-    _deviceNameFocusNode.dispose();
-    super.dispose();
-  }
-
-  _loadSettings() async {
-    _prefs = await SharedPreferences.getInstance();
-    String? storedDeviceName = _prefs.getString('userName');
-    String systemDeviceName = Platform.localHostname;
-    _deviceNameController.text = storedDeviceName ?? systemDeviceName;
-    setState(() {});
-  }
-
-  _saveDeviceName() async {
-    await _prefs.setString('userName', _deviceNameController.text);
-    setState(() {
-      _isEditingDeviceName = false;
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Device name saved successfully!')),
-    );
-  }
-
-  _toggleEditDeviceName() {
-    setState(() {
-      if (_isEditingDeviceName) {
-        _saveDeviceName();
-      } else {
-        _isEditingDeviceName = true;
-        _deviceNameFocusNode.requestFocus();
-      }
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final themeProvider = Provider.of<ThemeProvider>(context);
-    bool isDarkMode = themeProvider.isDarkMode;
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Settings',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.2,
+      backgroundColor: Colors.transparent,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFF4A90E2),
+              Color(0xFF357ABD),
+            ],
           ),
         ),
-        centerTitle: true,
-        elevation: 0,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                theme.colorScheme.primary,
-                theme.colorScheme.primaryContainer,
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              // Header
+              const Padding(
+                padding: EdgeInsets.all(22.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'ConnectX',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                          Text(
+                            'Settings',
+                            style: TextStyle(
+                              fontSize: 36,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Settings Section
+              Expanded(
+                child: Container(
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(30),
+                      topRight: Radius.circular(30),
+                    ),
+                  ),
+                  child: ListView(
+                    padding: const EdgeInsets.all(24.0),
+                    children: [
+                      _buildSettingsItem(
+                        icon: Icons.person_outline,
+                        title: 'Profile',
+                        subtitle: 'Manage your profile settings',
+                        onTap: () {},
+                      ),
+                      _buildSettingsItem(
+                        icon: Icons.wifi_outlined,
+                        title: 'Network Preferences',
+                        subtitle: 'Configure WiFi P2P settings',
+                        onTap: () {},
+                      ),
+                      _buildSettingsItem(
+                        icon: Icons.security_outlined,
+                        title: 'Privacy & Security',
+                        subtitle: 'Manage your privacy settings',
+                        onTap: () {},
+                      ),
+                      _buildSettingsItem(
+                        icon: Icons.notifications_outlined,
+                        title: 'Notifications',
+                        subtitle: 'Configure notification preferences',
+                        onTap: () {},
+                      ),
+                      _buildSettingsItem(
+                        icon: Icons.storage_outlined,
+                        title: 'Storage',
+                        subtitle: 'Manage app storage and cache',
+                        onTap: () {},
+                      ),
+                      _buildSettingsItem(
+                        icon: Icons.help_outline,
+                        title: 'Help & Support',
+                        subtitle: 'Get help and contact support',
+                        onTap: () {},
+                      ),
+                      _buildSettingsItem(
+                        icon: Icons.info_outline,
+                        title: 'About',
+                        subtitle: 'App version and information',
+                        onTap: () {},
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ListView(
-          children: [
-            const Text(
-              "Device Name",
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 5),
-            Card(
-              elevation: 3,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                child: Row(
-                  children: [
-                    const Icon(Icons.device_hub, size: 24),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: TextField(
-                        controller: _deviceNameController,
-                        focusNode: _deviceNameFocusNode,
-                        decoration: const InputDecoration(border: InputBorder.none),
-                        readOnly: !_isEditingDeviceName,
-                        autofocus: _isEditingDeviceName,
-                        style: const TextStyle(fontSize: 14),
-                        onSubmitted: (_) => _saveDeviceName(),
-                        onEditingComplete: _saveDeviceName,
-                      ),
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        _isEditingDeviceName ? Icons.check : Icons.edit,
-                        color: _isEditingDeviceName ? Colors.green : Colors.blueAccent,
-                      ),
-                      onPressed: _toggleEditDeviceName,
-                    ),
-                  ],
+    );
+  }
+
+  Widget _buildSettingsItem({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+    bool isDestructive = false,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE3F2FD),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: onTap,
+          child: Row(
+            children: [
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: isDestructive
+                      ? Colors.red.withOpacity(0.1)
+                      : const Color(0xFF90CAF9),
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                child: Icon(
+                  icon,
+                  color: isDestructive ? Colors.red : Colors.white,
+                  size: 24,
                 ),
               ),
-            ),
-
-            const SizedBox(height: 12),
-            const Divider(),
-
-            const Text(
-              "Download Path",
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 5),
-
-            Card(
-              elevation: 3,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                child: Row(
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.folder, size: 24),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        "/storage/emulated/0/Download/ConnectX/",
-                        style: const TextStyle(fontSize: 14),
-                        softWrap: false,
-                        overflow: TextOverflow.ellipsis,
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: isDestructive ? Colors.red : Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: isDestructive
+                            ? Colors.red.withOpacity(0.7)
+                            : Colors.black54,
                       ),
                     ),
                   ],
                 ),
               ),
-            ),
-
-            const SizedBox(height: 12),
-            const Divider(),
-
-            const Text(
-              "Appearance",
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 5),
-
-            Card(
-              elevation: 3,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              child: ListTile(
-                leading: Icon(
-                  isDarkMode ? Icons.dark_mode : Icons.light_mode,
-                  color: isDarkMode ? Colors.orangeAccent : Colors.blueAccent,
-                ),
-                title: const Text('Dark Mode', style: TextStyle(fontSize: 14)),
-                trailing: Switch(
-                  value: isDarkMode,
-                  onChanged: (bool value) {
-                    themeProvider.toggleTheme();
-                  },
-                ),
+              Icon(
+                Icons.arrow_forward_ios,
+                color: isDestructive ? Colors.red : const Color(0xFF4A90E2),
+                size: 20,
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
