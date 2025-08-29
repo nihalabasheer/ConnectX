@@ -326,7 +326,8 @@ class _WifiPage2State extends State<Home>
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.all(20.0),
+                padding: const EdgeInsets.only(
+                    left: 22.0, right: 22.0, top: 22.0, bottom: 20.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
