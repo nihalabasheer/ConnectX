@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'dart:ui';
 import '../screens/recentchatspage.dart';
 import '../screens/home.dart';
 import '../screens/settings.dart';
@@ -23,14 +22,8 @@ class NavigationState extends State<Navigation> with TickerProviderStateMixin {
     super.initState();
     _pages = [
       const Home(),
-      Container(
-        color: Colors.transparent,
-        child: SavedChatsPage(key: UniqueKey()),
-      ),
-      Container(
-        color: Colors.transparent,
-        child: const SettingsPage(),
-      ),
+      SavedChatsPage(key: UniqueKey()),
+      const SettingsPage(),
     ];
 
     _animationController = AnimationController(
@@ -65,36 +58,21 @@ class NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
   void _reloadSavedChats() {
     setState(() {
-      _pages[1] = Container(
-        color: Colors.transparent,
-        child: SavedChatsPage(key: UniqueKey()),
-      );
+      _pages[1] = SavedChatsPage(key: UniqueKey());
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF1E3A8A),
-            Color(0xFF3B82F6),
-            Color(0xFF1D4ED8),
-            Color(0xFF1E40AF),
-          ],
-          stops: [0.0, 0.3, 0.7, 1.0],
-        ),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _pages,
       ),
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: IndexedStack(
-          index: _selectedIndex,
-          children: _pages,
-        ),
-        bottomNavigationBar: AnimatedBuilder(
+      bottomNavigationBar: Container(
+        color: Colors.white,
+        child: AnimatedBuilder(
           animation: _animationController,
           builder: (context, child) {
             return Transform.translate(
@@ -102,71 +80,42 @@ class NavigationState extends State<Navigation> with TickerProviderStateMixin {
               child: Transform.scale(
                 scale: _scaleAnimation.value,
                 child: Container(
-                  margin: const EdgeInsets.fromLTRB(60, 0, 60, 20),
-                  height: 75,
+                  margin: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
                       colors: [
-                        Color(0xFF1E3A8A),
-                        Color(0xFF3B82F6),
-                        Color(0xFF1D4ED8),
-                        Color(0xFF1E40AF),
+                        Color(0xFF4A90E2),
+                        Color(0xFF357ABD),
                       ],
-                      stops: [0.0, 0.3, 0.7, 1.0],
                     ),
-                    borderRadius: BorderRadius.circular(25),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.2),
-                      width: 1,
-                    ),
+                    borderRadius: BorderRadius.circular(30),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF1E40AF).withValues(alpha: 0.3),
-                        blurRadius: 25,
-                        offset: const Offset(0, 8),
-                        spreadRadius: 0,
-                      ),
-                      BoxShadow(
-                        color: Colors.white.withValues(alpha: 0.1),
-                        blurRadius: 1,
-                        offset: const Offset(0, 1),
+                        color: const Color(0xFF4A90E2).withValues(alpha: 0.3),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
                         spreadRadius: 0,
                       ),
                     ],
                   ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(25),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(25),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            _buildNavItem(
-                              icon: Icons.home_rounded,
-                              label: 'Home',
-                              index: 0,
-                            ),
-                            _buildNavItem(
-                              icon: Icons.chat_bubble_rounded,
-                              label: 'Chats',
-                              index: 1,
-                            ),
-                            _buildNavItem(
-                              icon: Icons.settings_rounded,
-                              label: 'Settings',
-                              index: 2,
-                            ),
-                          ],
-                        ),
+                  child: Row(
+                    children: [
+                      _buildNavItem(
+                        icon: Icons.home,
+                        label: 'Home',
+                        index: 0,
                       ),
-                    ),
+                      _buildNavItem(
+                        icon: Icons.chat_bubble_outline,
+                        label: 'Chat',
+                        index: 1,
+                      ),
+                      _buildNavItem(
+                        icon: Icons.settings,
+                        label: 'Settings',
+                        index: 2,
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -184,48 +133,46 @@ class NavigationState extends State<Navigation> with TickerProviderStateMixin {
   }) {
     final isSelected = _selectedIndex == index;
 
-    return GestureDetector(
-      onTap: () {
-        HapticFeedback.mediumImpact();
-        if (index == 1) {
-          _reloadSavedChats();
-        }
-        setState(() {
-          _selectedIndex = index;
-        });
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 50),
-        curve: Curves.easeOutCubic,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        decoration: const BoxDecoration(),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AnimatedScale(
-              scale: isSelected ? 1.1 : 1.0,
-              duration: const Duration(milliseconds: 200),
-              child: Icon(
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          HapticFeedback.mediumImpact();
+          if (index == 1) {
+            _reloadSavedChats();
+          }
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOutCubic,
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? Colors.white.withValues(alpha: 0.2)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(25),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
                 icon,
+                color: Colors.white,
                 size: 24,
-                color: isSelected
-                    ? Colors.white
-                    : Colors.white.withValues(alpha: 0.5),
               ),
-            ),
-            const SizedBox(height: 4),
-            AnimatedDefaultTextStyle(
-              duration: const Duration(milliseconds: 200),
-              style: TextStyle(
-                fontSize: isSelected ? 12 : 11,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                color: isSelected
-                    ? Colors.white
-                    : Colors.white.withValues(alpha: 0.5),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-              child: Text(label),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

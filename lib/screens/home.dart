@@ -7,7 +7,6 @@ import 'chat_page.dart';
 import '../services/device_info_storage.dart';
 import '../models/device_model.dart';
 import 'package:audioplayers/audioplayers.dart';
-import 'dart:ui';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -311,497 +310,308 @@ class _WifiPage2State extends State<Home>
     super.build(context);
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildAppBar(),
-            _buildMainContent(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAppBar() {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
-      child: Row(
-        children: [
-          _buildAppBarIcon(),
-          const SizedBox(width: 16),
-          _buildAppBarTitle(),
-          _buildMenuButton(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAppBarIcon() {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.2),
-          width: 1,
-        ),
-      ),
-      child: const Icon(
-        Icons.wifi_tethering_outlined,
-        color: Colors.white,
-        size: 24,
-      ),
-    );
-  }
-
-  Widget _buildAppBarTitle() {
-    return const Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'ConnectX',
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              letterSpacing: 0.5,
-            ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFF4A90E2),
+              Color(0xFF357ABD),
+            ],
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMenuButton() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.2),
-          width: 1,
         ),
-      ),
-      child: IconButton(
-        icon: const Icon(Icons.tune_rounded, color: Colors.white),
-        onPressed: showWifiOptionsBottomSheet,
-        tooltip: 'Network Options',
-      ),
-    );
-  }
-
-  Widget _buildMainContent() {
-    return Expanded(
-      child: Container(
-        margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-        decoration: _buildGlassContainerDecoration(),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _buildNetworkStatusCard(),
-                    const SizedBox(height: 24),
-                    _buildDevicesHeader(),
-                    const SizedBox(height: 16),
-                    _buildDevicesList(),
+                    const Text(
+                      'ConnectX',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: showWifiOptionsBottomSheet,
+                      child: const Icon(
+                        Icons.menu,
+                        color: Colors.white,
+                        size: 28,
+                      ),
+                    ),
                   ],
                 ),
               ),
-            ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Row(
+                      children: [
+                        Icon(
+                          Icons.wifi,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                        SizedBox(width: 12),
+                        Text(
+                          'Network Status',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    FutureBuilder<String?>(
+                      future: getSmoothIPAddress(),
+                      builder: (context, snapshot) {
+                        return Text(
+                          'IP Address: ${snapshot.data ?? "Not Available"}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.white70,
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 30),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _buildStatusIndicator(
+                          Icons.wifi,
+                          'Connected',
+                          wifiP2PInfo?.isConnected ?? false,
+                        ),
+                        _buildStatusIndicator(
+                          Icons.person,
+                          'Group Owner',
+                          wifiP2PInfo?.isGroupOwner ?? false,
+                        ),
+                        _buildStatusIndicator(
+                          Icons.group,
+                          'Group Formed',
+                          wifiP2PInfo?.groupFormed ?? false,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 40),
+              Expanded(
+                child: Container(
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(30),
+                      topRight: Radius.circular(30),
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Available Devices',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black87,
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                WifiP2PManager.instance.discover();
+                              },
+                              child: const Text(
+                                'Refresh',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Color(0xFF4A90E2),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: peers.isEmpty
+                            ? const Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.search_off,
+                                      size: 64,
+                                      color: Colors.grey,
+                                    ),
+                                    SizedBox(height: 16),
+                                    Text(
+                                      'No devices found',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        color: Colors.grey,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    SizedBox(height: 8),
+                                    Text(
+                                      'Pull down to refresh or tap Refresh',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : ListView.builder(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 24.0),
+                                itemCount: peers.length,
+                                itemBuilder: (context, index) {
+                                  final peer = peers[index];
+                                  return _buildDeviceItem(
+                                    peer.deviceName.isNotEmpty
+                                        ? peer.deviceName[0].toUpperCase()
+                                        : '?',
+                                    peer.deviceName,
+                                    peer.deviceAddress,
+                                    peer,
+                                  );
+                                },
+                              ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  BoxDecoration _buildGlassContainerDecoration() {
-    return BoxDecoration(
-      color: Colors.white.withValues(alpha: 0.1),
-      borderRadius: BorderRadius.circular(24),
-      border: Border.all(
-        color: Colors.white.withValues(alpha: 0.2),
-        width: 1,
-      ),
-    );
-  }
-
-  Widget _buildNetworkStatusCard() {
+  Widget _buildStatusIndicator(IconData icon, String label, bool isActive) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildNetworkStatusHeader(),
-        if (wifiP2PInfo != null) ...[
-          const SizedBox(height: 16),
-          _buildStatusChips(),
-        ],
-      ],
-    );
-  }
-
-  Widget _buildNetworkStatusHeader() {
-    return Row(
       children: [
         Container(
-          padding: const EdgeInsets.all(8),
+          width: 60,
+          height: 60,
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.2),
-            borderRadius: BorderRadius.circular(12),
+            color: isActive ? Colors.white : Colors.white.withOpacity(0.3),
+            shape: BoxShape.circle,
           ),
-          child: const Icon(
-            Icons.analytics_outlined,
-            color: Colors.white,
-            size: 20,
-          ),
-        ),
-        const SizedBox(width: 12),
-        const Text(
-          'Network Status',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+          child: Icon(
+            icon,
+            color: isActive ? const Color(0xFF4A90E2) : Colors.white70,
+            size: 24,
           ),
         ),
-      ],
-    );
-  }
-
-  Widget _buildStatusChips() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        _buildStatusIconButton(
-          icon: Icons.wifi_rounded,
-          isActive: wifiP2PInfo?.isConnected ?? false,
-          tooltip: 'Connected',
-        ),
-        _buildStatusIconButton(
-          icon: Icons.admin_panel_settings_rounded,
-          isActive: wifiP2PInfo?.isGroupOwner ?? false,
-          tooltip: 'Group Owner',
-        ),
-        _buildStatusIconButton(
-          icon: Icons.group_rounded,
-          isActive: wifiP2PInfo?.groupFormed ?? false,
-          tooltip: 'Group Formed',
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatusIconButton({
-    required IconData icon,
-    required bool isActive,
-    required String tooltip,
-  }) {
-    return Tooltip(
-      message: tooltip,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-        decoration: BoxDecoration(
-          color: isActive
-              ? const Color(0xFF1E40AF).withValues(alpha: 0.8)
-              : Colors.white.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isActive
-                ? const Color(0xFF1E40AF)
-                : Colors.white.withValues(alpha: 0.2),
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: isActive ? Colors.white : Colors.white.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(15),
           ),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 18,
-              color: isActive ? Colors.white : Colors.white70,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              tooltip,
-              style: TextStyle(
-                fontSize: 10,
-                color: isActive ? Colors.white : Colors.white70,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDevicesHeader() {
-    return Row(
-      children: [
-        _buildDevicesIcon(),
-        const SizedBox(width: 12),
-        const Expanded(
           child: Text(
-            'Available Devices',
+            label,
             style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+              fontSize: 12,
+              color: isActive ? const Color(0xFF4A90E2) : Colors.white,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ),
-        _buildRefreshButton(),
       ],
     );
   }
 
-  Widget _buildDevicesIcon() {
+  Widget _buildDeviceItem(String initial, String deviceName, String macAddress,
+      DiscoveredPeers peer) {
     return Container(
-      padding: const EdgeInsets.all(8),
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.2),
+        color: const Color(0xFFE3F2FD),
         borderRadius: BorderRadius.circular(12),
-      ),
-      child: const Icon(
-        Icons.devices_rounded,
-        color: Colors.white,
-        size: 20,
-      ),
-    );
-  }
-
-  Widget _buildRefreshButton() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.2),
-        ),
-      ),
-      child: IconButton(
-        icon: const Icon(Icons.refresh_rounded, color: Colors.white, size: 20),
-        onPressed: () => WifiP2PManager.instance.discover(),
-        tooltip: 'Refresh devices',
-      ),
-    );
-  }
-
-  Widget _buildDevicesList() {
-    return Expanded(
-      child: peers.isEmpty
-          ? _buildEmptyState()
-          : ListView.separated(
-              physics: const BouncingScrollPhysics(),
-              itemCount: peers.length,
-              separatorBuilder: (context, index) => const SizedBox(height: 12),
-              itemBuilder: (context, index) {
-                final peer = peers[index];
-                return _buildEnhancedPeerCard(context, peer);
-              },
-            ),
-    );
-  }
-
-  Widget _buildPeerAvatar(DiscoveredPeers peer) {
-    return Container(
-      width: 48,
-      height: 48,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.white.withValues(alpha: 0.2),
-            Colors.white.withValues(alpha: 0.1),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.3),
-        ),
-      ),
-      child: Center(
-        child: Text(
-          peer.deviceName.isNotEmpty ? peer.deviceName[0].toUpperCase() : '?',
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPeerInfo(DiscoveredPeers peer) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            peer.deviceName,
-            style: const TextStyle(
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-              fontSize: 16,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            peer.deviceAddress,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.7),
-              fontSize: 12,
-              fontFamily: 'monospace',
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPeerInfoButton(DiscoveredPeers peer) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.2),
-        ),
-      ),
-      child: IconButton(
-        icon: const Icon(Icons.info_outline_rounded, color: Colors.white70),
-        onPressed: () => showPeerDetailsDialog(context, peer),
-        tooltip: 'Device details',
-      ),
-    );
-  }
-
-  Widget _buildEnhancedPeerCard(BuildContext context, DiscoveredPeers peer) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.2),
-        ),
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(12),
           onTap: () => _handlePeerConnection(context, peer),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                _buildPeerAvatar(peer),
-                const SizedBox(width: 16),
-                _buildPeerInfo(peer),
-                _buildPeerInfoButton(peer),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNetworkInfoRow({
-    required IconData icon,
-    required String label,
-    required Widget valueWidget,
-  }) {
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: Colors.white70),
-        const SizedBox(width: 8),
-        Text(
-          '$label: ',
-          style: const TextStyle(
-            fontWeight: FontWeight.w500,
-            color: Colors.white70,
-            fontSize: 14,
-          ),
-        ),
-        const Spacer(),
-        valueWidget,
-      ],
-    );
-  }
-
-  Widget _buildStatusChip(String label, bool isActive) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: isActive
-            ? const Color(0xFF93C5FD).withValues(alpha: 0.3)
-            : Colors.white.withValues(alpha: 0.1),
-        border: Border.all(
-          color: isActive
-              ? const Color(0xFF93C5FD).withValues(alpha: 0.5)
-              : Colors.white.withValues(alpha: 0.2),
-        ),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 12,
-          color: isActive ? const Color(0xFFDDD6FE) : Colors.white70,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.2),
+          child: Row(
+            children: [
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF90CAF9),
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                child: Center(
+                  child: Text(
+                    initial,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
               ),
-            ),
-            child: const Icon(
-              Icons.search_off_rounded,
-              size: 48,
-              color: Colors.white60,
-            ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      deviceName,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      macAddress,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.black54,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              GestureDetector(
+                onTap: () => showPeerDetailsDialog(context, peer),
+                child: const Icon(
+                  Icons.info_outline,
+                  color: Color(0xFF4A90E2),
+                  size: 24,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
-          const Text(
-            'No devices found',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Pull down to refresh or start discovery',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.white70,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

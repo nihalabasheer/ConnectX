@@ -19,7 +19,8 @@ class WifiP2PManager {
   static final WifiP2PManager _instance = WifiP2PManager._privateConstructor();
 
   // Instance of the flutter_p2p_connection plugin
-  final FlutterP2pConnection _flutterP2pConnectionPlugin = FlutterP2pConnection();
+  final FlutterP2pConnection _flutterP2pConnectionPlugin =
+      FlutterP2pConnection();
 
   // Public getter to access the singleton instance
   static WifiP2PManager get instance => _instance;
@@ -43,7 +44,6 @@ class WifiP2PManager {
   String _as = '';
   HttpServer? _server;
 
-
   List<DiscoveredPeers> peers = [];
   StreamSubscription<WifiP2PInfo>? _streamWifiInfo;
   StreamSubscription<List<DiscoveredPeers>>? _streamPeers;
@@ -52,7 +52,8 @@ class WifiP2PManager {
   Future<void> initialize() async {
     await _flutterP2pConnectionPlugin.initialize();
     await _flutterP2pConnectionPlugin.register();
-    _streamWifiInfo = _flutterP2pConnectionPlugin.streamWifiP2PInfo().listen((event) {
+    _streamWifiInfo =
+        _flutterP2pConnectionPlugin.streamWifiP2PInfo().listen((event) {
       wifiP2PInfo = event;
     });
     _streamPeers = _flutterP2pConnectionPlugin.streamPeers().listen((event) {
@@ -83,12 +84,12 @@ class WifiP2PManager {
         shared: true,
       );
       httpServer.listen(
-            (req) async {
+        (req) async {
           if (req.uri.path == '/ws') {
             WebSocket socketServer = await WebSocketTransformer.upgrade(req);
             _sockets.add(socketServer);
             socketServer.listen(
-                  (event) async {
+              (event) async {
                 // SHARE TO CLIENTS
                 for (WebSocket? socket in _sockets) {
                   if (socket != null) {
@@ -100,10 +101,10 @@ class WifiP2PManager {
                   for (String msg in event.toString().split(_groupSeparation)) {
                     String url = msg.toString().split(_fileSizeSeperation).last;
                     int size = int.tryParse(msg
-                        .toString()
-                        .replaceFirst(_fileTransferCode, "")
-                        .split(_fileSizeSeperation)
-                        .first) ??
+                            .toString()
+                            .replaceFirst(_fileTransferCode, "")
+                            .split(_fileSizeSeperation)
+                            .first) ??
                         0;
                     int id = int.tryParse(url.split("&id=").last) ??
                         Random().nextInt(10000);
@@ -155,7 +156,7 @@ class WifiP2PManager {
                     "FlutterP2pConnection: A Device Disconnected from Socket!");
                 socketServer.close(_code);
                 _sockets.removeWhere(
-                        (e) => e == null ? true : e.closeCode == _code);
+                    (e) => e == null ? true : e.closeCode == _code);
               },
             );
             onConnect("${req.uri.queryParameters['as']}",
@@ -211,7 +212,7 @@ class WifiP2PManager {
           shared: true,
         );
         httpServer.listen(
-              (req) async {
+          (req) async {
             // HANDLE FILE REQUEST
             if (req.uri.path == '/file' && req.uri.hasQuery) {
               _handleFileRequest(req, transferUpdate);
@@ -230,18 +231,25 @@ class WifiP2PManager {
         debugPrint(
             "FlutterP2pConnection: Connected to Socket: $groupOwnerAddress:$_port");
         socket.listen(
-              (event) async {
+          (event) async {
             if (event.toString().startsWith(_fileTransferCode)) {
               // ADD TO FUTURE DOWNLOADS
               for (String msg in event.toString().split(_groupSeparation)) {
                 String url = msg.toString().split(_fileSizeSeperation).last;
-                int size = int.tryParse(msg.toString().replaceFirst(_fileTransferCode, "").split(_fileSizeSeperation).first) ??
+                int size = int.tryParse(msg
+                        .toString()
+                        .replaceFirst(_fileTransferCode, "")
+                        .split(_fileSizeSeperation)
+                        .first) ??
                     0;
                 if (!(url.startsWith("http://$_ipAddress:$_port/"))) {
                   int id = int.tryParse(url.split("&id=").last) ??
                       Random().nextInt(10000);
                   String filename = await _setName(
-                      url.split("/").last.replaceFirst("&id=${url.split("&id=").last}", ""),
+                      url
+                          .split("/")
+                          .last
+                          .replaceFirst("&id=${url.split("&id=").last}", ""),
                       downloadPath);
                   String path = "$downloadPath$filename";
                   CancelToken token = CancelToken();
@@ -355,7 +363,7 @@ class WifiP2PManager {
           for (int i = 0; i < paths.length; i++) {
             var size = await File(paths[i]).length();
             msg +=
-            "$_fileTransferCode$size${_fileSizeSeperation}http://$_ipAddress:$_port/file?path=${paths[i].replaceAll("&", _andSymbol).replaceAll("=", _equalsSymbol).replaceAll("?", _questionSymbol)}&id=${ids[i]}";
+                "$_fileTransferCode$size${_fileSizeSeperation}http://$_ipAddress:$_port/file?path=${paths[i].replaceAll("&", _andSymbol).replaceAll("=", _equalsSymbol).replaceAll("?", _questionSymbol)}&id=${ids[i]}";
             if (i < paths.length - 1) msg += _groupSeparation;
           }
           socket.add(msg);
@@ -407,9 +415,9 @@ class WifiP2PManager {
   }
 
   void _listenThenDownload(
-      void Function(TransferUpdate) transferUpdate,
-      String downloadPath,
-      ) async {
+    void Function(TransferUpdate) transferUpdate,
+    String downloadPath,
+  ) async {
     while (_server != null) {
       await Future.delayed(const Duration(seconds: 1));
       if (_futureDownloads.isNotEmpty) {
@@ -422,7 +430,7 @@ class WifiP2PManager {
               _futureDownloads[i].downloading = true;
               futures.add(
                 Future(
-                      () async {
+                  () async {
                     FutureDownload download = _futureDownloads[i];
                     await _downloadFile(
                       url: download.url,
@@ -452,7 +460,7 @@ class WifiP2PManager {
               _futureDownloads[i].downloading = true;
               futures.add(
                 Future(
-                      () async {
+                  () async {
                     FutureDownload download = _futureDownloads[i];
                     await _downloadFile(
                       url: download.url,
@@ -480,11 +488,10 @@ class WifiP2PManager {
     }
   }
 
-
   Future _handleFileRequest(
-      HttpRequest req,
-      void Function(TransferUpdate) transferUpdate,
-      ) async {
+    HttpRequest req,
+    void Function(TransferUpdate) transferUpdate,
+  ) async {
     String cancel = req.uri.queryParameters['cancel'] ?? "";
     String path = (req.uri.queryParameters['path'] ?? "")
         .replaceAll(_andSymbol, "&")
@@ -684,7 +691,7 @@ class WifiP2PManager {
           failed = true;
           Future.delayed(
             const Duration(milliseconds: 500),
-                () async {
+            () async {
               if (_deleteOnError == true) {
                 if (await File(path).exists()) File(path).delete();
               }
@@ -694,7 +701,7 @@ class WifiP2PManager {
               Response(requestOptions: RequestOptions(path: url)));
         })
         ..whenComplete(
-              () {
+          () {
             transferUpdate(
               TransferUpdate(
                 filename: filename,
@@ -732,7 +739,7 @@ class WifiP2PManager {
   // Send a file
   Future<void> sendFile(bool phone, BuildContext context) async {
     String? filePath = await FilesystemPicker.open(
-      context: context,  // Pass the BuildContext here
+      context: context, // Pass the BuildContext here
       rootDirectory: Directory(phone ? "/storage/emulated/0/" : "/storage/"),
       fsType: FilesystemType.file,
       fileTileSelectMode: FileTileSelectMode.wholeTile,
@@ -740,7 +747,8 @@ class WifiP2PManager {
       folderIconColor: Colors.blue,
     );
     if (filePath == null) return;
-    List<TransferUpdate>? updates = await _flutterP2pConnectionPlugin.sendFiletoSocket([filePath]);
+    List<TransferUpdate>? updates =
+        await _flutterP2pConnectionPlugin.sendFiletoSocket([filePath]);
     log(updates as num);
   }
 
@@ -825,8 +833,23 @@ class WifiP2PManager {
     return peersChannel.receiveBroadcastStream().map((peers) {
       List<DiscoveredPeers> p = [];
       if (peers == null) return p;
-      for (var obj in peers) {
-        Map<String, dynamic>? json = jsonDecode(obj);
+
+      // Parse the JSON string first
+      List<dynamic> peersList;
+      if (peers is String) {
+        peersList = jsonDecode(peers);
+      } else {
+        peersList = peers;
+      }
+
+      for (var obj in peersList) {
+        Map<String, dynamic>? json;
+        if (obj is String) {
+          json = jsonDecode(obj);
+        } else {
+          json = obj;
+        }
+
         if (json != null) {
           p.add(
             DiscoveredPeers(
@@ -853,6 +876,7 @@ class WifiP2PManager {
       return false;
     }
   }
+
   // Show a snack bar message
   void snack(BuildContext context, String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -873,23 +897,32 @@ class WifiP2PManager {
 
   Future<bool?> stopDiscovery() => _flutterP2pConnectionPlugin.stopDiscovery();
 
-  Future<WifiP2PGroupInfo?> groupInfo() => _flutterP2pConnectionPlugin.groupInfo();
+  Future<WifiP2PGroupInfo?> groupInfo() =>
+      _flutterP2pConnectionPlugin.groupInfo();
 
-  Stream<List<DiscoveredPeers>> get peersStream => _flutterP2pConnectionPlugin.streamPeers();
+  Stream<List<DiscoveredPeers>> get peersStream =>
+      _flutterP2pConnectionPlugin.streamPeers();
 
-  Stream<WifiP2PInfo> get wifiInfoStream => _flutterP2pConnectionPlugin.streamWifiP2PInfo();
+  Stream<WifiP2PInfo> get wifiInfoStream =>
+      _flutterP2pConnectionPlugin.streamWifiP2PInfo();
 
-  Future<bool?> checkWifiEnabled() => _flutterP2pConnectionPlugin.checkWifiEnabled();
+  Future<bool?> checkWifiEnabled() =>
+      _flutterP2pConnectionPlugin.checkWifiEnabled();
 
-  Future<bool?> checkLocationEnabled() => _flutterP2pConnectionPlugin.checkLocationEnabled();
+  Future<bool?> checkLocationEnabled() =>
+      _flutterP2pConnectionPlugin.checkLocationEnabled();
 
-  Future<bool> askLocationPermission() => _flutterP2pConnectionPlugin.askLocationPermission();
+  Future<bool> askLocationPermission() =>
+      _flutterP2pConnectionPlugin.askLocationPermission();
 
-  Future<bool> askStoragePermission() async => await _flutterP2pConnectionPlugin.askStoragePermission();
+  Future<bool> askStoragePermission() async =>
+      await _flutterP2pConnectionPlugin.askStoragePermission();
 
-  Future<bool> enableLocationServices() async => await _flutterP2pConnectionPlugin.enableLocationServices();
+  Future<bool> enableLocationServices() async =>
+      await _flutterP2pConnectionPlugin.enableLocationServices();
 
-  Future<bool> enableWifiServices() async => await _flutterP2pConnectionPlugin.enableWifiServices();
+  Future<bool> enableWifiServices() async =>
+      await _flutterP2pConnectionPlugin.enableWifiServices();
 
   //Future<bool> connect(String address) async => await FlutterP2pConnectionPlatform.instance.connect(address) == true;
 
