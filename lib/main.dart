@@ -27,24 +27,21 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Get the current theme state from ThemeProvider
     final themeProvider = Provider.of<ThemeProvider>(context);
 
     return MaterialApp(
       title: 'ConnectX',
       debugShowCheckedModeBanner: false,
-      /*theme: ThemeData(
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.purple,
-          elevation: 0,
-        ),
-        useMaterial3: true,
-        textTheme: const TextTheme(
-          bodyMedium: TextStyle(fontSize: 14, fontFamily: 'Roboto'),
-        ),
-      ),*/
-      theme: ThemeData.light(),
-      darkTheme: ThemeData.dark(),
+      theme: ThemeData.light().copyWith(
+        textTheme: ThemeData.light().textTheme.apply(
+              fontFamily: 'Roboto',
+            ),
+      ),
+      darkTheme: ThemeData.dark().copyWith(
+        textTheme: ThemeData.dark().textTheme.apply(
+              fontFamily: 'Roboto',
+            ),
+      ),
       themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
       home: SplashScreen(isFirstTime: isFirstTime),
     );

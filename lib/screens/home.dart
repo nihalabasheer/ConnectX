@@ -88,6 +88,7 @@ class _WifiPage2State extends State<Home>
   Future<void> showWifiOptionsBottomSheet() async {
     showModalBottomSheet(
       context: context,
+      backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
