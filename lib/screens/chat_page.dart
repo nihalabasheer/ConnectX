@@ -9,7 +9,7 @@ import '../services/aes.dart';
 import '../services/chat_storage.dart';
 import '../services/wifi_p2p_manager.dart';
 import 'package:flutter_p2p_connection/flutter_p2p_connection.dart';
-
+import '../services/settings_storage.dart';
 import 'videocall.dart';
 
 class ChatPage extends StatefulWidget {
@@ -68,7 +68,8 @@ class ChatPageState extends State<ChatPage> {
   }
 
   Future<void> _loadMessages() async {
-    List<ChatMessage> messages = await _chatStorage.loadChat(widget.deviceAddress);
+    List<ChatMessage> messages =
+        await _chatStorage.loadChat(widget.deviceAddress);
     setState(() {
       _messages = messages;
     });
@@ -82,14 +83,21 @@ class ChatPageState extends State<ChatPage> {
     });
     await _chatStorage.saveChat(widget.deviceAddress, _messages);
     _controller.clear();
-    WifiP2PManager.instance.sendStringToSocket(AESHelper.encryptMessage(message));
+    WifiP2PManager.instance
+        .sendStringToSocket(AESHelper.encryptMessage(message));
+  }
+
+  Future<String> _getDownloadPath() async {
+    return await SettingsStorage.getDownloadLocation();
   }
 
   Future<void> startSocket() async {
     if (widget.wifiP2PInfo != null) {
+      String downloadPath = await _getDownloadPath();
+
       bool started = await WifiP2PManager.instance.startSocket(
         groupOwnerAddress: widget.wifiP2PInfo!.groupOwnerAddress,
-        downloadPath: "/storage/emulated/0/Download/ConnectX/",
+        downloadPath: downloadPath,
         maxConcurrentDownloads: 2,
         deleteOnError: true,
         onConnect: (name, address) {
@@ -115,9 +123,11 @@ class ChatPageState extends State<ChatPage> {
 
   Future<void> connectToSocket() async {
     if (widget.wifiP2PInfo != null) {
+      String downloadPath = await _getDownloadPath();
+
       await WifiP2PManager.instance.connectToSocket(
         groupOwnerAddress: widget.wifiP2PInfo!.groupOwnerAddress,
-        downloadPath: "/storage/emulated/0/Download/ConnectX/",
+        downloadPath: downloadPath,
         maxConcurrentDownloads: 3,
         deleteOnError: true,
         onConnect: (address) {
@@ -147,7 +157,7 @@ class ChatPageState extends State<ChatPage> {
     );
     if (filePath == null) return;
     List<TransferUpdate>? updates =
-    await WifiP2PManager.instance.sendFiletoSocket(
+        await WifiP2PManager.instance.sendFiletoSocket(
       [
         filePath,
       ],
@@ -160,7 +170,9 @@ class ChatPageState extends State<ChatPage> {
       if (message.startsWith('{')) {
         try {
           final data = jsonDecode(message);
-          if (data['type'] == 'offer' || data['type'] == 'answer' || data['type'] == 'iceCandidate') {
+          if (data['type'] == 'offer' ||
+              data['type'] == 'answer' ||
+              data['type'] == 'iceCandidate') {
             // Forward signaling data to the VideoCallWidget
             if (isVideoCallActive) {
               _videoCallKey.currentState?.handleSignalingData(data);
@@ -171,9 +183,8 @@ class ChatPageState extends State<ChatPage> {
         } catch (e) {
           debugPrint("Error decoding JSON message: $e");
         }
-      }
-      else {
-        if(message == "Socket active"){
+      } else {
+        if (message == "Socket active") {
           setState(() {
             socketStatus = "Socket active";
           });
@@ -186,7 +197,8 @@ class ChatPageState extends State<ChatPage> {
 
   void _handleTextMessage(String message) {
     String decrypted = AESHelper.decryptMessage(message);
-    ChatMessage receivedMessage = ChatMessage(sender: 'Other', message: decrypted);
+    ChatMessage receivedMessage =
+        ChatMessage(sender: 'Other', message: decrypted);
     setState(() {
       _messages.add(receivedMessage);
     });
@@ -286,7 +298,8 @@ class ChatPageState extends State<ChatPage> {
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
               child: Row(
                 children: [
-                  const Icon(Icons.warning_amber, size: 20, color: Colors.orange),
+                  const Icon(Icons.warning_amber,
+                      size: 20, color: Colors.orange),
                   const SizedBox(width: 8),
                   const Text('Not connected', style: TextStyle(fontSize: 14)),
                   const Spacer(),
@@ -295,7 +308,8 @@ class ChatPageState extends State<ChatPage> {
                       padding: EdgeInsets.zero,
                       minimumSize: Size.zero,
                     ),
-                    child: const Text('CONNECT', style: TextStyle(fontSize: 14)),
+                    child:
+                        const Text('CONNECT', style: TextStyle(fontSize: 14)),
                     onPressed: () async {
                       await connectToSocket();
                       setState(() => socketStatus = 'Connecting...');
@@ -304,7 +318,6 @@ class ChatPageState extends State<ChatPage> {
                 ],
               ),
             ),
-
           Expanded(
             child: Stack(
               children: [
@@ -317,13 +330,18 @@ class ChatPageState extends State<ChatPage> {
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 8),
                       child: Row(
-                        mainAxisAlignment: isSender ? MainAxisAlignment.end : MainAxisAlignment.start,
+                        mainAxisAlignment: isSender
+                            ? MainAxisAlignment.end
+                            : MainAxisAlignment.start,
                         children: [
                           Flexible(
                             child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 12, horizontal: 16),
                               decoration: BoxDecoration(
-                                color: isSender ? Theme.of(context).primaryColor : Colors.grey[200],
+                                color: isSender
+                                    ? Theme.of(context).primaryColor
+                                    : Colors.grey[200],
                                 borderRadius: BorderRadius.circular(16),
                               ),
                               child: Text(
@@ -382,4 +400,3 @@ class ChatPageState extends State<ChatPage> {
     );
   }
 }
-

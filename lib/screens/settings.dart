@@ -1,9 +1,69 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:filesystem_picker/filesystem_picker.dart';
+import 'dart:io';
+import '../services/settings_storage.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
+
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  String _currentDownloadPath = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCurrentDownloadPath();
+  }
+
+  Future<void> _loadCurrentDownloadPath() async {
+    String path = await SettingsStorage.getDownloadLocation();
+    setState(() {
+      _currentDownloadPath = path;
+    });
+  }
+
+  Future<void> _changeDownloadLocation() async {
+    String? selectedPath = await FilesystemPicker.open(
+      context: context,
+      rootDirectory: Directory('/storage/emulated/0/'),
+      fsType: FilesystemType.folder,
+      showGoUp: true,
+      folderIconColor: Colors.blue,
+      title: 'Select Download Location',
+    );
+
+    if (selectedPath != null) {
+      String newPath =
+          selectedPath.endsWith('/') ? selectedPath : '$selectedPath/';
+      newPath = '${newPath}';
+
+      await SettingsStorage.setDownloadLocation(newPath);
+      setState(() {
+        _currentDownloadPath = newPath;
+      });
+
+      _showSnackBar('Download location updated');
+    }
+  }
+
+  Future<void> _resetToDefault() async {
+    String defaultPath = await SettingsStorage.getDefaultDownloadLocation();
+    await SettingsStorage.setDownloadLocation(defaultPath);
+    setState(() {
+      _currentDownloadPath = defaultPath;
+    });
+    _showSnackBar('Reset to default location');
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +83,6 @@ class SettingsPage extends StatelessWidget {
         child: SafeArea(
           child: Column(
             children: [
-              // Header
               const Padding(
                 padding: EdgeInsets.all(22.0),
                 child: Row(
@@ -54,8 +113,6 @@ class SettingsPage extends StatelessWidget {
                   ],
                 ),
               ),
-
-              // Settings Section
               Expanded(
                 child: Container(
                   decoration: const BoxDecoration(
@@ -74,6 +131,7 @@ class SettingsPage extends StatelessWidget {
                         subtitle: 'Manage your profile settings',
                         onTap: () {},
                       ),
+                      _buildDownloadLocationSection(),
                       _buildSettingsItem(
                         icon: Icons.wifi_outlined,
                         title: 'Network Preferences',
@@ -84,12 +142,6 @@ class SettingsPage extends StatelessWidget {
                         icon: Icons.security_outlined,
                         title: 'Privacy & Security',
                         subtitle: 'Manage your privacy settings',
-                        onTap: () {},
-                      ),
-                      _buildSettingsItem(
-                        icon: Icons.notifications_outlined,
-                        title: 'Notifications',
-                        subtitle: 'Configure notification preferences',
                         onTap: () {},
                       ),
                       _buildSettingsItem(
@@ -110,7 +162,6 @@ class SettingsPage extends StatelessWidget {
                         subtitle: 'App version and information',
                         onTap: () {},
                       ),
-                      const SizedBox(height: 20),
                     ],
                   ),
                 ),
@@ -118,6 +169,123 @@ class SettingsPage extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildDownloadLocationSection() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE3F2FD),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF90CAF9),
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                child: const Icon(
+                  Icons.folder_outlined,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 16),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Download Location',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'Choose where files are downloaded',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.black54,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.folder, color: Colors.grey, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    _currentDownloadPath.isEmpty
+                        ? 'Loading...'
+                        : _currentDownloadPath,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.black87,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: _changeDownloadLocation,
+                  icon: const Icon(Icons.edit, size: 18),
+                  label: const Text('Change'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF4A90E2),
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              ElevatedButton.icon(
+                onPressed: _resetToDefault,
+                icon: const Icon(Icons.refresh, size: 18),
+                label: const Text('Reset'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.grey[300],
+                  foregroundColor: Colors.black87,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
