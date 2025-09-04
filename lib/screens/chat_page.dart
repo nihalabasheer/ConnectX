@@ -10,7 +10,6 @@ import '../services/chat_storage.dart';
 import '../services/wifi_p2p_manager.dart';
 import 'package:flutter_p2p_connection/flutter_p2p_connection.dart';
 import '../services/settings_storage.dart';
-import 'videocall.dart';
 
 class ChatPage extends StatefulWidget {
   final String deviceName;
@@ -33,8 +32,6 @@ class ChatPageState extends State<ChatPage> {
   List<ChatMessage> _messages = [];
   final ChatStorage _chatStorage = ChatStorage();
   String socketStatus = 'Socket inactive';
-  bool isVideoCallActive = false;
-  final GlobalKey<VideoCallWidgetState> _videoCallKey = GlobalKey();
   bool _isGroupOwner = false;
 
   @override
@@ -167,30 +164,12 @@ class ChatPageState extends State<ChatPage> {
 
   void _handleIncomingMessage(dynamic message) {
     if (message is String) {
-      if (message.startsWith('{')) {
-        try {
-          final data = jsonDecode(message);
-          if (data['type'] == 'offer' ||
-              data['type'] == 'answer' ||
-              data['type'] == 'iceCandidate') {
-            // Forward signaling data to the VideoCallWidget
-            if (isVideoCallActive) {
-              _videoCallKey.currentState?.handleSignalingData(data);
-            }
-          } else {
-            _handleJsonMessage(message);
-          }
-        } catch (e) {
-          debugPrint("Error decoding JSON message: $e");
-        }
+      if (message == "Socket active") {
+        setState(() {
+          socketStatus = "Socket active";
+        });
       } else {
-        if (message == "Socket active") {
-          setState(() {
-            socketStatus = "Socket active";
-          });
-        } else {
-          _handleTextMessage(message);
-        }
+        _handleTextMessage(message);
       }
     }
   }
@@ -203,39 +182,6 @@ class ChatPageState extends State<ChatPage> {
       _messages.add(receivedMessage);
     });
     _chatStorage.saveChat(widget.deviceAddress, _messages);
-  }
-
-  void _handleJsonMessage(String message) {
-    try {
-      final data = jsonDecode(message);
-      switch (data['type']) {
-        case 'call_initiation':
-          setState(() {
-            isVideoCallActive = true;
-          });
-          break;
-        case 'call_end':
-          setState(() {
-            isVideoCallActive = false;
-          });
-          break;
-        default:
-          debugPrint("Unknown message type: ${data['type']}");
-          break;
-      }
-    } catch (e) {
-      debugPrint("Error decoding JSON message: $e");
-    }
-  }
-
-  void _endVideoCall() {
-    setState(() {
-      isVideoCallActive = false;
-    });
-    WifiP2PManager.instance.sendStringToSocket(jsonEncode({
-      'type': 'call_end',
-      'peerId': widget.deviceAddress,
-    }));
   }
 
   Future<void> requestManageAllFilesPermissionAndSendFile() async {
@@ -259,143 +205,261 @@ class ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Padding(
-          padding: const EdgeInsets.only(bottom: 11.0),
-          child: Text(widget.deviceName),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.videocam),
-            tooltip: 'Start Video Call',
-            onPressed: () {
-              setState(() {
-                isVideoCallActive = true;
-              });
-              WifiP2PManager.instance.sendStringToSocket(jsonEncode({
-                'type': 'call_initiation',
-                'peerId': widget.deviceAddress,
-              }));
-            },
-          ),
-        ],
-        flexibleSpace: Align(
-          alignment: Alignment.bottomLeft,
-          child: Padding(
-            padding: const EdgeInsets.only(left: 72.0, bottom: 3.0),
-            child: Text(
-              socketStatus,
-              style: const TextStyle(fontSize: 13),
-            ),
+      backgroundColor: Colors.transparent,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFF4A90E2),
+              Color(0xFF357ABD),
+            ],
           ),
         ),
-      ),
-      body: Column(
-        children: [
-          if (socketStatus != 'Socket active' && !_isGroupOwner)
-            Container(
-              color: Colors.orange[100],
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-              child: Row(
-                children: [
-                  const Icon(Icons.warning_amber,
-                      size: 20, color: Colors.orange),
-                  const SizedBox(width: 8),
-                  const Text('Not connected', style: TextStyle(fontSize: 14)),
-                  const Spacer(),
-                  TextButton(
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      minimumSize: Size.zero,
+        child: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(10, 10, 10, 5),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back, color: Colors.white),
+                      onPressed: () => Navigator.pop(context),
                     ),
-                    child:
-                        const Text('CONNECT', style: TextStyle(fontSize: 14)),
-                    onPressed: () async {
-                      await connectToSocket();
-                      setState(() => socketStatus = 'Connecting...');
-                    },
-                  ),
-                ],
-              ),
-            ),
-          Expanded(
-            child: Stack(
-              children: [
-                ListView.builder(
-                  padding: const EdgeInsets.all(12),
-                  itemCount: _messages.length,
-                  itemBuilder: (context, index) {
-                    final message = _messages[index];
-                    final isSender = message.sender == 'Me';
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Row(
-                        mainAxisAlignment: isSender
-                            ? MainAxisAlignment.end
-                            : MainAxisAlignment.start,
+                    Container(
+                      width: 40,
+                      height: 40,
+                      margin: const EdgeInsets.only(left: 8, right: 12),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF90CAF9),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Text(
+                          widget.deviceName.isNotEmpty
+                              ? widget.deviceName[0].toUpperCase()
+                              : '?',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Flexible(
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 12, horizontal: 16),
-                              decoration: BoxDecoration(
-                                color: isSender
-                                    ? Theme.of(context).primaryColor
-                                    : Colors.grey[200],
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Text(
-                                message.message,
-                                style: TextStyle(
-                                  color: isSender ? Colors.white : Colors.black,
-                                  fontSize: 16,
-                                ),
-                              ),
+                          Text(
+                            widget.deviceName,
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                          Text(
+                            socketStatus == 'Socket active'
+                                ? 'Active'
+                                : 'Inactive',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.white70,
                             ),
                           ),
                         ],
                       ),
-                    );
-                  },
+                    ),
+                  ],
                 ),
-                if (isVideoCallActive)
-                  Positioned(
-                    bottom: 10,
-                    right: 10,
-                    child: VideoCallWidget(
-                      key: _videoCallKey,
-                      peerId: widget.deviceName,
-                      onEndCall: _endVideoCall,
+              ),
+              if (socketStatus != 'Socket active' && !_isGroupOwner)
+                Container(
+                  margin: const EdgeInsets.fromLTRB(22, 5, 22, 0),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.orange[100],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.warning_amber,
+                          size: 20, color: Colors.orange),
+                      const SizedBox(width: 8),
+                      const Text('Not connected',
+                          style: TextStyle(fontSize: 14)),
+                      const Spacer(),
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          minimumSize: Size.zero,
+                        ),
+                        child: const Text('CONNECT',
+                            style: TextStyle(fontSize: 14)),
+                        onPressed: () async {
+                          await connectToSocket();
+                          setState(() => socketStatus = 'Connecting...');
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: Container(
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(30),
+                      topRight: Radius.circular(30),
                     ),
                   ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.attach_file),
-                  onPressed: requestManageAllFilesPermissionAndSendFile,
-                ),
-                Expanded(
-                  child: TextField(
-                    controller: _controller,
-                    decoration: const InputDecoration(
-                      hintText: 'Type a message',
-                      border: InputBorder.none,
-                    ),
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: ListView.builder(
+                          padding: const EdgeInsets.fromLTRB(24, 24, 24, 100),
+                          itemCount: _messages.length,
+                          itemBuilder: (context, index) {
+                            final message = _messages[index];
+                            final isSender = message.sender == 'Me';
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 16),
+                              child: Row(
+                                mainAxisAlignment: isSender
+                                    ? MainAxisAlignment.end
+                                    : MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  if (!isSender) ...[
+                                    Container(
+                                      width: 32,
+                                      height: 32,
+                                      decoration: const BoxDecoration(
+                                        color: Color(0xFF90CAF9),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          widget.deviceName.isNotEmpty
+                                              ? widget.deviceName[0]
+                                                  .toUpperCase()
+                                              : '?',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                  ],
+                                  Flexible(
+                                    child: Container(
+                                      constraints: BoxConstraints(
+                                        maxWidth:
+                                            MediaQuery.of(context).size.width *
+                                                0.7,
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 12, horizontal: 16),
+                                      decoration: BoxDecoration(
+                                        color: isSender
+                                            ? const Color(0xFF4A90E2)
+                                            : const Color(0xFFE3F2FD),
+                                        borderRadius: BorderRadius.only(
+                                          topLeft: const Radius.circular(18),
+                                          topRight: const Radius.circular(18),
+                                          bottomLeft: isSender
+                                              ? const Radius.circular(18)
+                                              : const Radius.circular(4),
+                                          bottomRight: isSender
+                                              ? const Radius.circular(4)
+                                              : const Radius.circular(18),
+                                        ),
+                                      ),
+                                      child: Text(
+                                        message.message,
+                                        style: TextStyle(
+                                          color: isSender
+                                              ? Colors.white
+                                              : Colors.black87,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(0),
+                            topRight: Radius.circular(0),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.attach_file,
+                                  color: Color(0xFF4A90E2)),
+                              onPressed:
+                                  requestManageAllFilesPermissionAndSendFile,
+                            ),
+                            Expanded(
+                              child: Container(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 16),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF5F5F5),
+                                  borderRadius: BorderRadius.circular(25),
+                                ),
+                                child: TextField(
+                                  controller: _controller,
+                                  decoration: const InputDecoration(
+                                    hintText: 'Message',
+                                    hintStyle: TextStyle(color: Colors.grey),
+                                    border: InputBorder.none,
+                                    contentPadding:
+                                        EdgeInsets.symmetric(vertical: 12),
+                                  ),
+                                  onSubmitted: (text) => _sendMessage(text),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Container(
+                              decoration: const BoxDecoration(
+                                color: Color(0xFF4A90E2),
+                                shape: BoxShape.circle,
+                              ),
+                              child: IconButton(
+                                icon:
+                                    const Icon(Icons.send, color: Colors.white),
+                                onPressed: () => _sendMessage(_controller.text),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.send),
-                  onPressed: () => _sendMessage(_controller.text),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
